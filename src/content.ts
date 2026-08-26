@@ -28,11 +28,36 @@ export const receptors = [
 ] as const;
 
 export const benefits = [
-  { title: "Weight and appetite control", copy: "Retatrutide may reduce appetite and prolong fullness, helping make a planned calorie deficit easier to maintain." },
-  { title: "Insulin resistance or prediabetes", copy: "Its combined receptor activity may support insulin sensitivity and blood-sugar regulation." },
-  { title: "Obesity and related conditions", copy: "Weight-management progress may reduce strain associated with excess weight and metabolic dysfunction." },
-  { title: "Type 2 diabetes support", copy: "The mechanism may support glucose management and appetite control as part of clinician-led care." },
-  { title: "Fatty liver prevention goals", copy: "Retatrutide may help lower liver fat and reduce systemic inflammation linked with metabolic dysfunction." },
+  {
+    title: "Weight and appetite control",
+    copy: "Retatrutide may reduce appetite and prolong fullness, helping make a planned calorie deficit easier to maintain.",
+    image: "assets/people/audience-appetite-v2.webp",
+    alt: "Woman preparing a balanced meal in a bright contemporary kitchen",
+  },
+  {
+    title: "Insulin resistance or prediabetes",
+    copy: "Its combined receptor activity may support insulin sensitivity and blood-sugar regulation.",
+    image: "assets/people/audience-insulin-v2.webp",
+    alt: "Man preparing for an energising walk in a light-filled wellness space",
+  },
+  {
+    title: "Obesity and related conditions",
+    copy: "Weight-management progress may reduce strain associated with excess weight and metabolic dysfunction.",
+    image: "assets/people/audience-obesity-v2.webp",
+    alt: "Woman exercising with a resistance band alongside a supportive coach",
+  },
+  {
+    title: "Type 2 diabetes support",
+    copy: "The mechanism may support glucose management and appetite control as part of clinician-led care.",
+    image: "assets/people/audience-diabetes-v2.webp",
+    alt: "Active mature couple walking through a contemporary indoor garden",
+  },
+  {
+    title: "Fatty liver prevention goals",
+    copy: "Retatrutide may help lower liver fat and reduce systemic inflammation linked with metabolic dysfunction.",
+    image: "assets/people/audience-liver-v2.webp",
+    alt: "Woman taking a cycling break beside a modern riverside promenade",
+  },
 ] as const;
 
 export type Bundle = {

@@ -5,9 +5,11 @@ const CART_ENDPOINT = "https://driadashop.to/index.php?route=external/cart/add";
 const CART_TOKEN = "1912.bedc2c70ff05b76507b1478aa3f0ed44ed757a932014dbf6c0993527f02bc750";
 const CONSULT_URL = "https://driadashop.helpline.to/en-US/new-ticket";
 const REVIEW_URL = "https://peds.to/reviews/retatrutide.157/reviews";
+const TRACKING_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
+const SUBID_KEYS = ["subid", "sub_id", "clickid", "click_id", "cid", "cnv_id", "tid", "transaction_id"] as const;
 
 function Arrow() {
-  return <span aria-hidden="true">↗</span>;
+  return <svg className="arrow-icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6" /></svg>;
 }
 
 function Eyebrow({ children }: { children: ReactNode }) {
@@ -15,10 +17,18 @@ function Eyebrow({ children }: { children: ReactNode }) {
 }
 
 function CartForm({ quantity = 1, className = "", children = "Buy now" }: { quantity?: number; className?: string; children?: ReactNode }) {
+  const query = typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
+  const tracking: Array<{ name: string; value: string }> = TRACKING_KEYS.flatMap((name) => {
+    const value = query?.get(name);
+    return value ? [{ name, value: value.slice(0, 120) }] : [];
+  });
+  const subid = SUBID_KEYS.map((name) => query?.get(name)).find(Boolean);
+  if (subid) tracking.push({ name: "subid", value: subid.slice(0, 120) });
   return (
     <form className={`cart-form ${className}`.trim()} method="post" action={CART_ENDPOINT}>
       <input type="hidden" name="token" value={CART_TOKEN} />
       <input type="hidden" name="quantity" value={quantity} />
+      {tracking.map((field) => <input key={field.name} type="hidden" name={field.name} value={field.value} />)}
       <button className="button button--dark" type="submit">{children}<Arrow /></button>
     </form>
   );
@@ -26,6 +36,12 @@ function CartForm({ quantity = 1, className = "", children = "Buy now" }: { quan
 
 function Header() {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [open]);
   return (
     <header className="site-header">
       <a className="wordmark" href="#top" aria-label="Retatrutide home">RETATRUTIDE</a>
@@ -82,12 +98,24 @@ function Hero() {
 }
 
 function TrustRail() {
+  const items = [
+    { value: "99%", label: "third-party tested purity", href: "#quality" },
+    { value: "4.92 / 5", label: "36 forum reviews", href: REVIEW_URL },
+    { value: "EU", label: "European delivery" },
+    { value: "48h", label: "dispatch target" },
+  ];
   return (
     <aside className="trust-rail" aria-label="Product highlights">
-      <a href="#quality"><strong>99%</strong><span>third-party tested purity</span></a>
-      <a href={REVIEW_URL}><strong>4.92 / 5</strong><span>36 forum reviews</span></a>
-      <div><strong>EU</strong><span>European delivery</span></div>
-      <div><strong>48h</strong><span>dispatch target</span></div>
+      <div className="trust-rail__track">
+        <div className="trust-rail__group">
+          {items.map((item) => item.href
+            ? <a key={item.value} href={item.href}><strong>{item.value}</strong><span>{item.label}</span></a>
+            : <div key={item.value}><strong>{item.value}</strong><span>{item.label}</span></div>)}
+        </div>
+        <div className="trust-rail__group" aria-hidden="true">
+          {items.map((item) => <div key={item.value}><strong>{item.value}</strong><span>{item.label}</span></div>)}
+        </div>
+      </div>
     </aside>
   );
 }
@@ -98,9 +126,9 @@ function Transformation() {
   const labelId = useId();
   return (
     <div className={manual ? "transformation is-manual" : "transformation"} style={{ "--compare": `${position}%` } as CSSProperties}>
-      <img src="assets/people/transformation-before.webp" alt="Woman before an illustrative body-composition transformation" width="760" height="1024" />
-      <div className="transformation-after"><img src="assets/people/transformation-after.webp" alt="The same woman after an illustrative body-composition transformation" width="760" height="1024" /></div>
-      <div className="transformation-line" aria-hidden="true"><span>↔</span></div>
+      <img src="assets/people/transformation-start-v2.webp" alt="Woman before an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
+      <div className="transformation-after"><img src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" /></div>
+      <div className="transformation-line" aria-hidden="true"><span><svg viewBox="0 0 24 24"><path d="m9 7-5 5 5 5M15 7l5 5-5 5M4 12h16" /></svg></span></div>
       <div className="transformation-labels"><span>Start</span><span>Progress</span></div>
       <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Compare illustrative before and after images</label>
       <input id={`${labelId}-range`} type="range" min="8" max="92" value={position} aria-labelledby={labelId} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setPosition(Number(event.currentTarget.value)); }} />
@@ -156,6 +184,12 @@ function Mechanism() {
 
 function WhoFor() {
   const [active, setActive] = useState(0);
+  const tabsId = useId();
+  const moveTab = (index: number) => {
+    const next = (index + benefits.length) % benefits.length;
+    setActive(next);
+    requestAnimationFrame(() => document.getElementById(`${tabsId}-tab-${next}`)?.focus());
+  };
   return (
     <section className="section who" id="who">
       <div className="section-shell">
@@ -164,8 +198,22 @@ function WhoFor() {
           <p>Select an area to review the information provided for that group.</p>
         </div>
         <div className="who-stage" data-reveal>
-          <img src="assets/people/wellness-group.webp" alt="Five adults representing varied health and weight-management goals" width="1440" height="792" loading="lazy" />
-          <div className="who-card">
+          <div className="who-media">
+            {benefits.map((item, index) => (
+              <img
+                key={item.image}
+                className={active === index ? "is-active" : ""}
+                src={item.image}
+                alt={active === index ? item.alt : ""}
+                aria-hidden={active !== index}
+                width="1440"
+                height="960"
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+              />
+            ))}
+          </div>
+          <div className="who-card" id={`${tabsId}-panel`} role="tabpanel" aria-labelledby={`${tabsId}-tab-${active}`} aria-live="polite">
             <span>0{active + 1} / 05</span>
             <h3>{benefits[active].title}</h3>
             <p>{benefits[active].copy}</p>
@@ -173,7 +221,12 @@ function WhoFor() {
         </div>
         <div className="who-tabs" role="tablist" aria-label="Benefit topics">
           {benefits.map((item, index) => (
-            <button key={item.title} role="tab" aria-selected={active === index} onClick={() => setActive(index)}>
+            <button key={item.title} id={`${tabsId}-tab-${index}`} role="tab" aria-controls={`${tabsId}-panel`} aria-selected={active === index} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={(event) => {
+              if (event.key === "ArrowRight") { event.preventDefault(); moveTab(index + 1); }
+              if (event.key === "ArrowLeft") { event.preventDefault(); moveTab(index - 1); }
+              if (event.key === "Home") { event.preventDefault(); moveTab(0); }
+              if (event.key === "End") { event.preventDefault(); moveTab(benefits.length - 1); }
+            }}>
               <span>0{index + 1}</span>{item.title}
             </button>
           ))}
@@ -309,10 +362,47 @@ function Footer() {
       <div className="footer-grid">
         <div><a className="wordmark" href="#top">RETATRUTIDE</a><p>Product information, documentation and the next purchasing step in one place.</p><div><a className="button button--light" href={CONSULT_URL}>Consult an expert<Arrow /></a><a className="button button--metal" href="#products">Buy now<Arrow /></a></div></div>
         <nav aria-label="Footer"><strong>Explore</strong>{nav.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
-        <div className="footer-meta"><strong>Independent sources</strong><a href={REVIEW_URL}>Forum reviews<Arrow /></a><a href="https://www.eroids.com/reviews/driadashop.to">DriadaShop reviews<Arrow /></a></div>
+        <div className="footer-meta"><strong>Independent sources</strong><a href={REVIEW_URL}>Forum reviews<Arrow /></a><a href="https://www.eroids.com/reviews/driadashop.to">DriadaShop reviews<Arrow /></a><button type="button" onClick={() => window.dispatchEvent(new Event("retatrutide:open-cookie-settings"))}>Cookie settings</button></div>
       </div>
       <div className="footer-bottom"><p>Early studies show Retatrutide is generally well tolerated, but long-term data is limited. A doctor’s prescription is required.</p><span>© 2026 Retatrutide</span><a href="#top">Back to top ↑</a></div>
     </footer>
+  );
+}
+
+function MobileBuy() {
+  const [heroVisible, setHeroVisible] = useState(true);
+  const [footerVisible, setFooterVisible] = useState(false);
+  useEffect(() => {
+    const hero = document.getElementById("top");
+    const footer = document.querySelector(".site-footer");
+    const heroObserver = hero ? new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), { threshold: .01 }) : null;
+    const footerObserver = footer ? new IntersectionObserver(([entry]) => setFooterVisible(entry.isIntersecting), { threshold: .01 }) : null;
+    if (hero && heroObserver) heroObserver.observe(hero);
+    if (footer && footerObserver) footerObserver.observe(footer);
+    return () => { heroObserver?.disconnect(); footerObserver?.disconnect(); };
+  }, []);
+  if (heroVisible || footerVisible) return null;
+  return <div className="mobile-buy"><CartForm>Buy now</CartForm></div>;
+}
+
+function CookieBanner() {
+  const consentKey = "retatrutide-essential-cookie-choice";
+  const dismissedKey = "retatrutide-cookie-notice-dismissed";
+  const [visible, setVisible] = useState(() => {
+    try { return localStorage.getItem(consentKey) !== "accepted" && sessionStorage.getItem(dismissedKey) !== "true"; }
+    catch { return true; }
+  });
+  useEffect(() => {
+    const open = () => setVisible(true);
+    window.addEventListener("retatrutide:open-cookie-settings", open);
+    return () => window.removeEventListener("retatrutide:open-cookie-settings", open);
+  }, []);
+  if (!visible) return null;
+  return (
+    <aside className="cookie-banner" aria-label="Cookie notice" aria-live="polite">
+      <p><strong>Your privacy matters.</strong> This site uses essential cookies only.</p>
+      <div><button type="button" onClick={() => { try { sessionStorage.setItem(dismissedKey, "true"); } catch { /* storage can be unavailable */ } setVisible(false); }}>Dismiss</button><button type="button" onClick={() => { try { localStorage.setItem(consentKey, "accepted"); } catch { /* storage can be unavailable */ } setVisible(false); }}>Accept essential</button></div>
+    </aside>
   );
 }
 
@@ -344,7 +434,7 @@ export default function App() {
   return (
     <>
       <Header /><main><Hero /><TrustRail /><About /><Mechanism /><WhoFor /><Products /><Quality onOpen={() => setReportOpen(true)} /><Reviews /><FAQ /></main><Footer />
-      <a className="mobile-buy" href="#products">Buy now<Arrow /></a>
+      <MobileBuy /><CookieBanner />
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} />
     </>
   );
