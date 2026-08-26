@@ -1,0 +1,50 @@
+# Dependencies and generated builds
+node_modules/
+dist/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Environment files and local configuration
+.env
+.env.*
+!.env.example
+*.local
+
+# Credentials and deployment keys
+.ssh/
+**/.ssh/
+.npmrc
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+deploy-key*
+deployment-key*
+private-key*
+server-key*
+credentials*
+secrets*
+known_hosts*
+
+# Local deployment configuration and temporary browser/build data
+.tmp/
+DEPLOYMENT.md
+scripts/
+
+# Working assets, historical experiments, and generated audit captures
+archive/
+production-assets/
+reference/
+product.webp
+lab-test.webp
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
