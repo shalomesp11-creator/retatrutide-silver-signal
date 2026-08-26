@@ -285,9 +285,10 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 @media (max-width: 1100px) {
   :root { --shell: calc(100vw - 40px); }
   .site-header { grid-template-columns: 1fr auto; }
-  .nav { position: absolute; top: 72px; left: 0; right: 0; padding: 18px; border: 1px solid var(--line); border-radius: 18px; display: none; flex-direction: column; align-items: stretch; background: rgba(249,249,246,.97); box-shadow: 0 20px 50px rgba(20,21,19,.12); }
+  .nav { position: absolute; top: 72px; left: 0; right: 0; padding: 10px; gap: 0; border: 1px solid var(--line); border-radius: 18px; display: none; flex-direction: column; align-items: stretch; background: rgba(249,249,246,.97); box-shadow: 0 20px 50px rgba(20,21,19,.12); }
   .nav.is-open { display: flex; }
-  .nav a { padding: 12px; }
+  .nav a { padding: 12px; border-bottom: 1px solid var(--line); }
+  .nav a:last-child { border-bottom: 0; }
   .menu-button { justify-self: end; width: 64px; height: 44px; padding: 0; border: 0; display: flex; align-items: center; justify-content: center; gap: 5px; background: transparent; cursor: pointer; }
   .menu-button span { font-size: 11px; }
   .menu-button i { display: block; width: 4px; height: 4px; border-radius: 50%; background: #111; }
