@@ -89,7 +89,7 @@ export const products: readonly Product[] = [
     id: "10",
     dosage: "10 mg / vial",
     name: "Retatrutide 10",
-    image: "assets/product/retatrutide-10mg.webp",
+    image: "assets/product/retatrutide-10mg-cutout-v2.webp",
     price: "€61.30",
     original: "€73.80",
     saving: "Save €12.50 · 17%",

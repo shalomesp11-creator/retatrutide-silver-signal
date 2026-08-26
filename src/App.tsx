@@ -241,7 +241,6 @@ function ProductCard({ product }: { product: Product }) {
     <article className={`product-card product-card--${product.id}`} data-reveal>
       <div className="product-card__visual">
         <span className="product-card__index">{product.id} MG</span>
-        <div className="product-card__halo" aria-hidden="true" />
         <img src={product.image} alt={`Driada Medical Retatrutide ${product.dosage} packaging`} width="900" height="900" loading="lazy" />
       </div>
       <div className="product-card__body">
@@ -375,11 +374,14 @@ function MobileBuy() {
   useEffect(() => {
     const hero = document.getElementById("top");
     const footer = document.querySelector(".site-footer");
-    const heroObserver = hero ? new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), { threshold: .01 }) : null;
-    const footerObserver = footer ? new IntersectionObserver(([entry]) => setFooterVisible(entry.isIntersecting), { threshold: .01 }) : null;
-    if (hero && heroObserver) heroObserver.observe(hero);
-    if (footer && footerObserver) footerObserver.observe(footer);
-    return () => { heroObserver?.disconnect(); footerObserver?.disconnect(); };
+    const update = () => {
+      if (hero) setHeroVisible(window.scrollY < hero.offsetTop + hero.offsetHeight - 1);
+      if (footer instanceof HTMLElement) setFooterVisible(window.scrollY + window.innerHeight > footer.offsetTop);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => { window.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
   }, []);
   if (heroVisible || footerVisible) return null;
   return <div className="mobile-buy"><CartForm>Buy now</CartForm></div>;
@@ -427,9 +429,15 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.add("js");
     const nodes = [...document.querySelectorAll<HTMLElement>("[data-reveal]")];
-    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); observer.unobserve(entry.target); } }), { rootMargin: "0px 0px -8%", threshold: 0.08 });
+    const revealPassed = () => nodes.forEach((node) => {
+      if (!node.classList.contains("is-visible") && node.getBoundingClientRect().top <= window.innerHeight * .94) node.classList.add("is-visible");
+    });
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); observer.unobserve(entry.target); } }), { rootMargin: "0px 0px 80px", threshold: 0.01 });
     nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+    revealPassed();
+    window.addEventListener("scroll", revealPassed, { passive: true });
+    window.addEventListener("resize", revealPassed);
+    return () => { observer.disconnect(); window.removeEventListener("scroll", revealPassed); window.removeEventListener("resize", revealPassed); };
   }, []);
   return (
     <>
