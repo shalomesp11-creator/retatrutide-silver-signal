@@ -81,6 +81,7 @@ export type Product = {
   saving: string;
   accent: string;
   water: string;
+  lab: { label: string; href?: string };
   bundles: readonly Bundle[];
 };
 
@@ -92,9 +93,10 @@ export const products: readonly Product[] = [
     image: "assets/product/retatrutide-10mg-v3.png",
     price: "€61.30",
     original: "€73.80",
-    saving: "Save €12.50 · 17%",
+    saving: "Save €12.50",
     accent: "Violet identity",
     water: "1 ml water for injection",
+    lab: { label: "Lab test · 99% purity", href: "#quality" },
     bundles: [
       { name: "Starter", quantity: 1, supply: "1 unit", price: "€61.30", original: "€73.80", unit: "€61.30 / unit", saving: "Save €12.50" },
       { name: "Performance", quantity: 3, supply: "3 units · buy 3 & save", price: "€166.80", original: "€221.40", unit: "€55.60 / unit", saving: "Save €54.60", popular: true },
@@ -108,9 +110,10 @@ export const products: readonly Product[] = [
     image: "assets/product/retatrutide-20mg.webp",
     price: "€90.27",
     original: "€106.20",
-    saving: "Save €15.93 · 15%",
+    saving: "Save €15.93",
     accent: "Aqua identity",
     water: "1 ml bacteriostatic water",
+    lab: { label: "Lab report · publishing soon" },
     bundles: [
       { name: "Starter", quantity: 1, supply: "1 unit", price: "€90.27", original: "€106.20", unit: "€90.27 / unit", saving: "Save €15.93" },
       { name: "Performance", quantity: 3, supply: "3 units · 3-month supply", price: "€270.81", original: "€318.60", unit: "€90.27 / unit", saving: "Save €47.79", popular: true },

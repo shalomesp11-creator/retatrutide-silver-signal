@@ -62,8 +62,6 @@ function Header() {
 function Hero() {
   return (
     <section className="hero" id="top">
-      <div className="hero-orbit hero-orbit--one" aria-hidden="true" />
-      <div className="hero-orbit hero-orbit--two" aria-hidden="true" />
       <div className="hero-topline">
         <span><i /> In stock</span>
         <span>Lab tested · 99% purity</span>
@@ -79,18 +77,6 @@ function Hero() {
         <div className="hero-cta">
           <a className="button button--dark" href="#mechanism">Explore the mechanism<Arrow /></a>
           <a className="text-link" href={CONSULT_URL}>Consult an expert<Arrow /></a>
-        </div>
-      </div>
-      <div className="hero-signal" aria-label="Three receptor pathways">
-        {receptors.map((item) => (
-          <div key={item.short}>
-            <small>{item.number}</small>
-            <strong>{item.short}</strong>
-            <span>{item.title}</span>
-          </div>
-        ))}
-        <div className="hero-signal__result">
-          <small>Combined</small><strong>Triple-action signal</strong><span>One coordinated mechanism</span>
         </div>
       </div>
     </section>
@@ -244,7 +230,9 @@ function ProductCard({ product }: { product: Product }) {
         <img src={product.image} alt={`Driada Medical Retatrutide ${product.dosage} packaging`} width="900" height="900" loading="lazy" />
       </div>
       <div className="product-card__body">
-        <div className="product-card__meta"><span><i /> In stock</span><a href="#quality">Lab test · 99% purity</a></div>
+        <div className="product-card__meta"><span><i /> In stock</span>{product.lab.href
+          ? <a href={product.lab.href}>{product.lab.label}</a>
+          : <em>{product.lab.label}</em>}</div>
         <Eyebrow>Driada Medical · {product.accent}</Eyebrow>
         <h3>Retatrutide</h3>
         <p className="product-card__dose">{product.dosage}</p>
@@ -368,25 +356,6 @@ function Footer() {
   );
 }
 
-function MobileBuy() {
-  const [heroVisible, setHeroVisible] = useState(true);
-  const [footerVisible, setFooterVisible] = useState(false);
-  useEffect(() => {
-    const hero = document.getElementById("top");
-    const footer = document.querySelector(".site-footer");
-    const update = () => {
-      if (hero) setHeroVisible(window.scrollY < hero.offsetTop + hero.offsetHeight - 1);
-      if (footer instanceof HTMLElement) setFooterVisible(window.scrollY + window.innerHeight > footer.offsetTop);
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => { window.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
-  }, []);
-  if (heroVisible || footerVisible) return null;
-  return <div className="mobile-buy"><CartForm>Buy now</CartForm></div>;
-}
-
 function CookieBanner() {
   const consentKey = "retatrutide-essential-cookie-choice";
   const dismissedKey = "retatrutide-cookie-notice-dismissed";
@@ -442,7 +411,7 @@ export default function App() {
   return (
     <>
       <Header /><main><Hero /><TrustRail /><About /><Mechanism /><WhoFor /><Products /><Quality onOpen={() => setReportOpen(true)} /><Reviews /><FAQ /></main><Footer />
-      <MobileBuy /><CookieBanner />
+      <CookieBanner />
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} />
     </>
   );
