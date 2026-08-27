@@ -69,7 +69,7 @@ function Hero() {
       </div>
       <div className="hero-copy" data-reveal>
         <Eyebrow>Triple-receptor peptide · Driada Medical</Eyebrow>
-        <h1>Reta<span>trutide</span></h1>
+        <h1>Retat<span>rutide</span></h1>
         <div className="hero-intro">
           <h2>A next-generation peptide developed to support weight loss.</h2>
           <p>One molecule designed to activate GLP-1, GIP and glucagon pathways — supporting appetite control, glucose response and energy expenditure.</p>
@@ -112,12 +112,14 @@ function Transformation() {
   const labelId = useId();
   return (
     <div className={manual ? "transformation is-manual" : "transformation"} style={{ "--compare": `${position}%` } as CSSProperties}>
-      <img src="assets/people/transformation-start-v2.webp" alt="Woman before an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
-      <div className="transformation-after"><img src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" /></div>
-      <div className="transformation-line" aria-hidden="true"><span><svg viewBox="0 0 24 24"><path d="m9 7-5 5 5 5M15 7l5 5-5 5M4 12h16" /></svg></span></div>
-      <div className="transformation-labels"><span>Start</span><span>Progress</span></div>
+      <div className="transformation-frame">
+        <img src="assets/people/transformation-start-v2.webp" alt="Woman before an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
+        <div className="transformation-after"><img src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" /></div>
+        <div className="transformation-line" aria-hidden="true"><span><svg viewBox="0 0 24 24"><path d="m9 7-5 5 5 5M15 7l5 5-5 5M4 12h16" /></svg></span></div>
+        <div className="transformation-labels"><span>Start</span><span>Progress</span></div>
+      </div>
       <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Compare illustrative before and after images</label>
-      <input id={`${labelId}-range`} type="range" min="8" max="92" value={position} aria-labelledby={labelId} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setPosition(Number(event.currentTarget.value)); }} />
+      <input id={`${labelId}-range`} type="range" min="6" max="94" value={position} aria-labelledby={labelId} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setPosition(Number(event.currentTarget.value)); }} />
     </div>
   );
 }
@@ -128,7 +130,7 @@ function About() {
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
           <div><Eyebrow>What is Retatrutide</Eyebrow><h2>Three signals.<br />One molecule.</h2></div>
-          <p>Retatrutide is designed to activate three key metabolic pathways at the same time. That combined approach represents a new direction in metabolic research.</p>
+          <p><span>Retatrutide is designed to activate three key metabolic pathways at the same time. That combined approach represents a new direction in metabolic research.</span></p>
         </div>
         <div className="about-grid">
           <div data-reveal><Transformation /></div>
@@ -151,7 +153,7 @@ function Mechanism() {
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
           <div><Eyebrow>How Retatrutide works</Eyebrow><h2>A coordinated<br />metabolic response.</h2></div>
-          <p>The three receptor pathways address different parts of the metabolic response — appetite, glucose regulation and energy expenditure.</p>
+          <p><span>The three receptor pathways address different parts of the metabolic response — appetite, glucose regulation and energy expenditure.</span></p>
         </div>
         <div className="mechanism-list">
           {receptors.map((item) => (
@@ -181,7 +183,7 @@ function WhoFor() {
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
           <div><Eyebrow>Who may benefit</Eyebrow><h2>Designed around<br />real-life goals.</h2></div>
-          <p>Select an area to review the information provided for that group.</p>
+          <p><span>Select an area to review the information provided for that group.</span></p>
         </div>
         <div className="who-stage" data-reveal>
           <div className="who-media">
@@ -278,7 +280,7 @@ function Products() {
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
           <div><Eyebrow>Two product options</Eyebrow><h2>Choose your<br />Retatrutide.</h2></div>
-          <p>Two Driada Medical formats, shown at their real proportions and with their individual pricing.</p>
+          <p><span>Two Driada Medical formats, shown at their real proportions and with their individual pricing.</span></p>
         </div>
         <div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} />)}</div>
         <div className="pricing-heading" data-reveal><Eyebrow>Quantity & price</Eyebrow><h2>One clear choice at a time.</h2></div>
@@ -300,7 +302,7 @@ function Quality({ onOpen }: { onOpen: () => void }) {
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
           <div><Eyebrow>Quality & authenticity</Eyebrow><h2>Documentation<br />you can inspect.</h2></div>
-          <p>The supplied laboratory report is presented with the product identity and batch information so the available material can be reviewed directly.</p>
+          <p><span>The supplied laboratory report is presented with the product identity and batch information so the available material can be reviewed directly.</span></p>
         </div>
         <div className="quality-card" data-reveal>
           <button className="quality-preview" type="button" onClick={onOpen} aria-label="Open laboratory report">
