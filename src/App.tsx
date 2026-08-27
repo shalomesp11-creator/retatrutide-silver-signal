@@ -231,9 +231,9 @@ function WhoFor() {
 function ProductCard({ product }: { product: Product }) {
   return (
     <article className={`product-card product-card--${product.id}`} data-reveal>
-      <div className="product-card__visual" data-dark>
+      <div className="product-card__visual">
         <span className="product-card__index">{product.id} MG</span>
-        <img src={product.image} alt={`Driada Medical Retatrutide ${product.dosage} packaging`} width="900" height="900" loading="lazy" />
+        <img src={product.image} alt={`Driada Medical Retatrutide ${product.dosage} packaging`} width="1400" height="933" loading="eager" />
       </div>
       <div className="product-card__body">
         <div className="product-card__meta"><span><i /> In stock</span>{product.lab.href
