@@ -200,7 +200,6 @@ function Mechanism() {
               <span className="mechanism-number">{item.number}</span>
               <h3>{item.short}</h3>
               <div><h4>{item.title}</h4><p>{item.copy}</p></div>
-              <i aria-hidden="true" />
             </article>
           ))}
         </div>
