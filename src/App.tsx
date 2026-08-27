@@ -107,19 +107,22 @@ function TrustRail() {
 }
 
 function Transformation() {
-  const [position, setPosition] = useState(50);
+  // The slider is a progress amount, not a split: at 0 the fuller figure is shown,
+  // and raising it dissolves through to the slimmer one. Desktop demonstrates this
+  // on its own until the visitor takes over; mobile is manual only.
+  const [progress, setProgress] = useState(0);
   const [manual, setManual] = useState(false);
   const labelId = useId();
   return (
-    <div className={manual ? "transformation is-manual" : "transformation"} style={{ "--compare": `${position}%` } as CSSProperties}>
+    <div className={manual ? "transformation is-manual" : "transformation"} style={{ "--p": progress } as CSSProperties}>
       <div className="transformation-frame">
-        <img src="assets/people/transformation-start-v2.webp" alt="Woman before an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
-        <div className="transformation-after"><img src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" /></div>
-        <div className="transformation-line" aria-hidden="true"><span><svg viewBox="0 0 24 24"><path d="m9 7-5 5 5 5M15 7l5 5-5 5M4 12h16" /></svg></span></div>
-        <div className="transformation-labels"><span>Start</span><span>Progress</span></div>
+        <img className="transformation-before" src="assets/people/transformation-start-v2.webp" alt="Woman at the start of an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
+        <img className="transformation-after" src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
+        <div className="transformation-labels" aria-hidden="true"><span>Start</span><span>Progress</span></div>
+        <div className="transformation-track" aria-hidden="true"><i /><b /></div>
       </div>
-      <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Compare illustrative before and after images</label>
-      <input id={`${labelId}-range`} type="range" min="6" max="94" value={position} aria-labelledby={labelId} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setPosition(Number(event.currentTarget.value)); }} />
+      <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Drag to move from the starting figure to the later one</label>
+      <input id={`${labelId}-range`} type="range" min="0" max="100" value={progress} aria-labelledby={labelId} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setProgress(Number(event.currentTarget.value)); }} />
     </div>
   );
 }
@@ -149,7 +152,7 @@ function About() {
 
 function Mechanism() {
   return (
-    <section className="section mechanism" id="mechanism">
+    <section className="section mechanism" id="mechanism" data-dark>
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
           <div><Eyebrow>How Retatrutide works</Eyebrow><h2>A coordinated<br />metabolic response.</h2></div>
@@ -192,10 +195,11 @@ function WhoFor() {
                 key={item.image}
                 className={active === index ? "is-active" : ""}
                 src={item.image}
+                style={{ objectPosition: item.focus }}
                 alt={active === index ? item.alt : ""}
                 aria-hidden={active !== index}
-                width="1440"
-                height="960"
+                width="1536"
+                height="1024"
                 loading={index === 0 ? "eager" : "lazy"}
                 decoding="async"
               />
@@ -227,7 +231,7 @@ function WhoFor() {
 function ProductCard({ product }: { product: Product }) {
   return (
     <article className={`product-card product-card--${product.id}`} data-reveal>
-      <div className="product-card__visual">
+      <div className="product-card__visual" data-dark>
         <span className="product-card__index">{product.id} MG</span>
         <img src={product.image} alt={`Driada Medical Retatrutide ${product.dosage} packaging`} width="900" height="900" loading="lazy" />
       </div>
@@ -258,12 +262,12 @@ function PricingGroup({ product }: { product: Product }) {
       <header>
         <div><span>{product.id}</span><p>Driada Medical</p></div>
         <div><h3 id={`pricing-${product.id}`}>Retatrutide {product.id} mg</h3><p>Choose the quantity that fits your plan.</p></div>
-        <strong>{product.price}<small> / unit</small></strong>
+        <strong className="pricing-group__unit">{product.price}<small> / unit</small></strong>
       </header>
       <div className="pricing-rows">
         {product.bundles.map((bundle) => (
           <article key={bundle.name} className={bundle.popular ? "is-popular" : ""}>
-            <div className="pricing-name">{bundle.popular && <span>Most popular</span>}<strong>{bundle.name}</strong><small>{bundle.supply}</small></div>
+            <div className="pricing-name"><strong>{bundle.name}</strong><small>{bundle.supply}</small></div>
             <div className="pricing-total"><strong>{bundle.price}</strong><s>{bundle.original}</s></div>
             <div className="pricing-value"><span>{bundle.unit}</span><span>{bundle.saving}</span></div>
             <CartForm quantity={bundle.quantity}>Choose {bundle.quantity} {bundle.quantity === 1 ? "unit" : "units"}</CartForm>
@@ -346,7 +350,7 @@ function FAQ() {
 
 function Footer() {
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" data-dark>
       <div className="footer-signal" aria-hidden="true">RETATRUTIDE</div>
       <div className="footer-grid">
         <div><a className="wordmark" href="#top">RETATRUTIDE</a><p>Product information, documentation and the next purchasing step in one place.</p><div><a className="button button--light" href={CONSULT_URL}>Consult an expert<Arrow /></a><a className="button button--metal" href="#products">Buy now<Arrow /></a></div></div>
@@ -397,6 +401,22 @@ function ReportDialog({ open, onClose }: { open: boolean; onClose: () => void })
 
 export default function App() {
   const [reportOpen, setReportOpen] = useState(false);
+  useEffect(() => {
+    // The header is translucent, so it inverts wherever it floats over a dark surface.
+    const header = document.querySelector<HTMLElement>(".site-header");
+    if (!header) return;
+    const update = () => {
+      const box = header.getBoundingClientRect();
+      const y = box.top + box.height / 2;
+      const overDark = [18, window.innerWidth / 2, window.innerWidth - 18].some((x) =>
+        document.elementsFromPoint(x, y).some((el) => !el.closest(".site-header") && el instanceof HTMLElement && el.hasAttribute("data-dark")));
+      header.classList.toggle("is-inverted", overDark);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => { window.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
+  }, []);
   useEffect(() => {
     document.documentElement.classList.add("js");
     const nodes = [...document.querySelectorAll<HTMLElement>("[data-reveal]")];
