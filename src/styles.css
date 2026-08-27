@@ -75,7 +75,7 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 .hero-copy { position: relative; z-index: 2; margin-top: 58px; }
 .hero-copy .eyebrow { margin-bottom: 38px; }
 .hero h1 { margin: 0 0 56px; font: 500 clamp(118px, 16.4vw, 268px)/.72 "Manrope", sans-serif; letter-spacing: -.085em; white-space: nowrap; }
-.hero h1 span { color: transparent; background: linear-gradient(101deg, #2f342f 0%, #6e736e 9%, #b3b7b0 17%, #474c47 25%, #7d827c 37%, #b9bdb5 45%, #3d423d 53%, #878c86 65%, #b0b4ad 73%, #414640 83%, #71766f 100%); -webkit-background-clip: text; background-clip: text; text-shadow: 0 1px 0 rgba(255,255,255,.55); }
+.hero h1 span { display: inline-block; padding-right: .055em; margin-right: -.055em; color: transparent; -webkit-text-fill-color: transparent; background: linear-gradient(101deg, #2f342f 0%, #6e736e 9%, #b3b7b0 17%, #474c47 25%, #7d827c 37%, #b9bdb5 45%, #3d423d 53%, #878c86 65%, #b0b4ad 73%, #414640 83%, #71766f 100%); -webkit-background-clip: text; background-clip: text; }
 .hero-intro { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .65fr); gap: clamp(40px, 5.5vw, 88px); align-items: start; width: min(1080px, 100%); }
 .hero-intro h2 { max-width: 680px; margin: 0; font: 500 clamp(30px, 3.1vw, 48px)/1.05 "Manrope", sans-serif; letter-spacing: -.045em; }
 .hero-intro p { margin: 0; color: #5d605b; font-size: 16px; line-height: 1.65; }
@@ -430,9 +430,9 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
   .who-tabs { grid-template-columns: 1fr 1fr; }
   .who-tabs button { min-height: 96px; }
   .who-tabs button:last-child { grid-column: 1 / -1; }
-  .product-grid { grid-template-columns: 1fr; }
-  .product-card { border-radius: 22px; }
-  .product-card__visual { aspect-ratio: 3 / 2; }
+  .product-grid { grid-template-columns: minmax(0, 1fr); }
+  .product-card { min-width: 0; border-radius: 22px; }
+  .product-card__visual { height: auto; aspect-ratio: 3 / 2; }
   .product-card__body { padding: 24px 20px; }
   .product-card__meta { margin-bottom: 28px; font-size: 8px; }
   .product-card__body h3 { font-size: 44px; }
