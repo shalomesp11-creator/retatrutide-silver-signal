@@ -98,9 +98,11 @@ function TrustRail() {
             ? <a key={item.value} href={item.href}><strong>{item.value}</strong><span>{item.label}</span></a>
             : <div key={item.value}><strong>{item.value}</strong><span>{item.label}</span></div>)}
         </div>
-        <div className="trust-rail__group" aria-hidden="true">
-          {items.map((item) => <div key={item.value}><strong>{item.value}</strong><span>{item.label}</span></div>)}
-        </div>
+        {[1, 2, 3, 4, 5].map((copy) => (
+          <div className="trust-rail__group" aria-hidden="true" key={copy}>
+            {items.map((item) => <div key={item.value}><strong>{item.value}</strong><span>{item.label}</span></div>)}
+          </div>
+        ))}
       </div>
     </aside>
   );
