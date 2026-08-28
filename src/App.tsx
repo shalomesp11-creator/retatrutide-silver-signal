@@ -220,6 +220,7 @@ function Transformation() {
       <div className="transformation-labels" aria-hidden="true"><span>Start</span><span>Progress</span></div>
       <span id={labelId} className="sr-only">Drag horizontally from Start to Progress to move from the fuller starting figure to the slimmer progress figure</span>
       <div
+        ref={trackRef}
         className="transformation-control"
         role="slider"
         tabIndex={0}
@@ -232,9 +233,8 @@ function Transformation() {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onKeyDown={handleKeyDown}
-      >
-        <div ref={trackRef} className="transformation-track" aria-hidden="true"><i /><b><span /></b></div>
-      </div>
+      />
+      <div className="transformation-range" aria-hidden="true"><div className="transformation-divider"><b /></div></div>
     </div>
   );
 }
