@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import { benefits, faqs, nav, products, receptors, reviews, type Product } from "./content";
 
 const CART_ENDPOINT = "https://driadashop.to/index.php?route=external/cart/add";
@@ -115,52 +115,21 @@ function Transformation() {
   const [progress, setProgress] = useState(0);
   const [manual, setManual] = useState(false);
   const labelId = useId();
-  const trackRef = useRef<HTMLDivElement>(null);
-  const activePointer = useRef<number | null>(null);
-  const setProgressFromPointer = (clientX: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const bounds = track.getBoundingClientRect();
-    const next = ((clientX - bounds.left) / bounds.width) * 100;
-    setProgress(Math.min(100, Math.max(0, next)));
-  };
-  const startTouchDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!window.matchMedia("(max-width: 760px)").matches) return;
-    activePointer.current = event.pointerId;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    event.preventDefault();
-    setManual(true);
-    setProgressFromPointer(event.clientX);
-  };
-  const moveTouchDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (activePointer.current !== event.pointerId) return;
-    event.preventDefault();
-    setProgressFromPointer(event.clientX);
-  };
-  const finishTouchDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (activePointer.current !== event.pointerId) return;
-    event.preventDefault();
-    setProgressFromPointer(event.clientX);
-    activePointer.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-  };
   return (
     <div
       className={manual ? "transformation is-manual" : "transformation"}
       style={{ "--p": progress } as CSSProperties}
-      onPointerDown={startTouchDrag}
-      onPointerMove={moveTouchDrag}
-      onPointerUp={finishTouchDrag}
-      onPointerCancel={(event) => { if (activePointer.current === event.pointerId) activePointer.current = null; }}
     >
       <div className="transformation-frame">
         <img className="transformation-before" src="assets/people/transformation-start-v2.webp" alt="Woman at the start of an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
         <img className="transformation-after" src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
         <div className="transformation-labels" aria-hidden="true"><span>Start</span><span>Progress</span></div>
-        <div ref={trackRef} className="transformation-track" aria-hidden="true"><i /><b /></div>
       </div>
-      <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Drag to move from the starting figure to the later one</label>
-      <input id={`${labelId}-range`} type="range" min="0" max="100" step="0.1" value={progress} aria-labelledby={labelId} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setProgress(Number(event.currentTarget.value)); }} />
+      <div className="transformation-control">
+        <div className="transformation-track" aria-hidden="true"><i /><b /></div>
+        <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Drag to move from the fuller starting figure on the left to the slimmer progress figure on the right</label>
+        <input id={`${labelId}-range`} type="range" min="0" max="100" step="0.1" value={progress} aria-labelledby={labelId} onPointerDown={() => setManual(true)} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setProgress(Number(event.currentTarget.value)); }} />
+      </div>
     </div>
   );
 }
