@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { benefits, faqs, products, receptors, reviews, type Bundle, type Product } from "./content";
+import { benefitMeta, products, receptorMeta, reviewMeta, type Bundle, type Product } from "./content";
 import { Arrow, Eyebrow, CONSULT_URL, REVIEW_URL, Header, Footer, CookieBanner, useHeaderInvert, useReveal } from "./site";
+import { useT } from "./i18n";
 
 const TRACKING_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
 const SUBID_KEYS = ["subid", "sub_id", "clickid", "click_id", "cid", "cnv_id", "tid", "transaction_id"] as const;
@@ -8,7 +9,7 @@ const SUBID_KEYS = ["subid", "sub_id", "clickid", "click_id", "cid", "cnv_id", "
 // Carries the chosen product + bundle into the checkout mock via the query string —
 // the hand-off point a real cart/session would replace later.
 function checkoutHref(product: Product, bundle: Bundle) {
-  const params = new URLSearchParams({ product: product.id, bundle: bundle.name, qty: String(bundle.quantity) });
+  const params = new URLSearchParams({ product: product.id, bundle: bundle.id, qty: String(bundle.quantity) });
   if (typeof window !== "undefined") {
     const query = new URLSearchParams(window.location.search);
     TRACKING_KEYS.forEach((key) => { const value = query.get(key); if (value) params.set(key, value.slice(0, 120)); });
@@ -19,23 +20,24 @@ function checkoutHref(product: Product, bundle: Bundle) {
 }
 
 function Hero() {
+  const t = useT();
   return (
     <section className="hero" id="top">
       <div className="hero-topline">
-        <span><i /> In stock</span>
-        <span>Lab tested · 99% purity</span>
-        <span>EU delivery · dispatch within 48 hours</span>
+        <span><i /> {t.hero.inStock}</span>
+        <span>{t.hero.labTested}</span>
+        <span>{t.hero.delivery}</span>
       </div>
       <div className="hero-copy" data-reveal>
-        <Eyebrow>Triple-receptor peptide · Driada Medical</Eyebrow>
+        <Eyebrow>{t.hero.eyebrow} · Driada Medical</Eyebrow>
         <h1>Retat<span>rutide</span></h1>
         <div className="hero-intro">
-          <h2>A next-generation peptide developed to support weight loss.</h2>
-          <p>One molecule designed to activate GLP-1, GIP and glucagon pathways — supporting appetite control, glucose response and energy expenditure.</p>
+          <h2>{t.hero.subtitle}</h2>
+          <p>{t.hero.description}</p>
         </div>
         <div className="hero-cta">
-          <a className="button button--dark" href="#mechanism">Explore the mechanism<Arrow /></a>
-          <a className="text-link" href={CONSULT_URL}>Consult an expert<Arrow /></a>
+          <a className="button button--dark" href="#mechanism">{t.hero.ctaExplore}<Arrow /></a>
+          <a className="text-link" href={CONSULT_URL}>{t.common.consultExpert}<Arrow /></a>
         </div>
       </div>
     </section>
@@ -43,14 +45,15 @@ function Hero() {
 }
 
 function TrustRail() {
+  const t = useT();
   const items = [
-    { value: "99%", label: "third-party tested purity", href: "#quality" },
-    { value: "4.92 / 5", label: "36 forum reviews", href: REVIEW_URL },
-    { value: "EU", label: "European delivery" },
-    { value: "48h", label: "dispatch target" },
+    { value: "99%", label: t.trustRail.purity, href: "#quality" },
+    { value: "4.92 / 5", label: `36 ${t.trustRail.reviews}`, href: REVIEW_URL },
+    { value: "EU", label: t.trustRail.delivery },
+    { value: "48h", label: t.trustRail.dispatch },
   ];
   return (
-    <aside className="trust-rail" aria-label="Product highlights">
+    <aside className="trust-rail" aria-label={t.trustRail.ariaLabel}>
       <div className="trust-rail__track">
         <div className="trust-rail__group">
           {items.map((item) => item.href
@@ -68,6 +71,7 @@ function TrustRail() {
 }
 
 function Transformation() {
+  const t = useT();
   const [progress, setProgress] = useState(0);
   const [manual, setManual] = useState(false);
   const progressRef = useRef(0);
@@ -173,11 +177,11 @@ function Transformation() {
       style={{ "--p": progress } as CSSProperties}
     >
       <div className="transformation-frame">
-        <img className="transformation-before" src="assets/people/transformation-start-v2.webp" alt="Woman at the start of an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
-        <img className="transformation-after" src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
+        <img className="transformation-before" src="assets/people/transformation-start-v2.webp" alt={t.transformation.altBefore} width="900" height="1350" decoding="async" />
+        <img className="transformation-after" src="assets/people/transformation-progress-v2.webp" alt={t.transformation.altAfter} width="900" height="1350" decoding="async" />
       </div>
-      <div className="transformation-labels" aria-hidden="true"><span>Start</span><span>Progress</span></div>
-      <span id={labelId} className="sr-only">Drag horizontally from Start to Progress to move from the fuller starting figure to the slimmer progress figure</span>
+      <div className="transformation-labels" aria-hidden="true"><span>{t.transformation.start}</span><span>{t.transformation.progress}</span></div>
+      <span id={labelId} className="sr-only">{t.transformation.srDescription}</span>
       <div
         ref={trackRef}
         className="transformation-control"
@@ -187,7 +191,7 @@ function Transformation() {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progress)}
-        aria-valuetext={`${Math.round(progress)}% progress`}
+        aria-valuetext={`${Math.round(progress)}% ${t.transformation.progress}`}
         aria-orientation="horizontal"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -199,21 +203,22 @@ function Transformation() {
 }
 
 function About() {
+  const t = useT();
   return (
     <section className="section about" id="about">
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
-          <div><Eyebrow>What is Retatrutide</Eyebrow><h2>Three signals.<br />One molecule.</h2></div>
-          <p><span>Retatrutide is designed to activate three key metabolic pathways at the same time. That combined approach represents a new direction in metabolic research.</span></p>
+          <div><Eyebrow>{t.about.eyebrow}</Eyebrow><h2>{t.about.titleLine1}<br />{t.about.titleLine2}</h2></div>
+          <p><span>{t.about.description}</span></p>
         </div>
         <div className="about-grid">
           <div data-reveal><Transformation /></div>
           <div className="signal-diagram" data-reveal>
-            <p>One molecule · three signals</p>
-            <div className="signal-diagram__nodes">{receptors.map((item) => <span key={item.short}>{item.short}</span>)}</div>
+            <p>{t.about.diagramLabel}</p>
+            <div className="signal-diagram__nodes">{receptorMeta.map((item) => <span key={item.short}>{item.short}</span>)}</div>
             <div className="signal-diagram__threads" aria-hidden="true"><i /><i /><i /></div>
-            <div className="signal-diagram__core"><small>Combined activation</small><strong>Triple-action<br />signal</strong></div>
-            <div className="signal-diagram__outcomes">{receptors.map((item) => <span key={item.title}><small>{item.number}</small>{item.title}</span>)}</div>
+            <div className="signal-diagram__core"><small>{t.about.coreLabel}</small><strong>{t.about.coreLine1}<br />{t.about.coreLine2}</strong></div>
+            <div className="signal-diagram__outcomes">{receptorMeta.map((item, index) => <span key={item.short}><small>{item.number}</small>{t.mechanism.items[index].title}</span>)}</div>
           </div>
         </div>
       </div>
@@ -222,19 +227,20 @@ function About() {
 }
 
 function Mechanism() {
+  const t = useT();
   return (
     <section className="section mechanism" id="mechanism" data-dark>
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
-          <div><Eyebrow>How Retatrutide works</Eyebrow><h2>A coordinated<br />metabolic response.</h2></div>
-          <p><span>The three receptor pathways address different parts of the metabolic response — appetite, glucose regulation and energy expenditure.</span></p>
+          <div><Eyebrow>{t.mechanism.eyebrow}</Eyebrow><h2>{t.mechanism.titleLine1}<br />{t.mechanism.titleLine2}</h2></div>
+          <p><span>{t.mechanism.description}</span></p>
         </div>
         <div className="mechanism-list">
-          {receptors.map((item) => (
+          {receptorMeta.map((item, index) => (
             <article key={item.number} data-reveal>
               <span className="mechanism-number">{item.number}</span>
               <h3>{item.short}</h3>
-              <div><h4>{item.title}</h4><p>{item.copy}</p></div>
+              <div><h4>{t.mechanism.items[index].title}</h4><p>{t.mechanism.items[index].copy}</p></div>
             </article>
           ))}
         </div>
@@ -244,6 +250,8 @@ function Mechanism() {
 }
 
 function WhoFor() {
+  const t = useT();
+  const benefits = t.who.items;
   const [active, setActive] = useState(0);
   const tabsId = useId();
   const moveTab = (index: number) => {
@@ -255,18 +263,18 @@ function WhoFor() {
     <section className="section who" id="who">
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
-          <div><Eyebrow>Who may benefit</Eyebrow><h2>Designed around<br />real-life goals.</h2></div>
-          <p><span>Select an area to review the information provided for that group.</span></p>
+          <div><Eyebrow>{t.who.eyebrow}</Eyebrow><h2>{t.who.titleLine1}<br />{t.who.titleLine2}</h2></div>
+          <p><span>{t.who.description}</span></p>
         </div>
         <div className="who-stage" data-reveal>
           <div className="who-media">
-            {benefits.map((item, index) => (
+            {benefitMeta.map((meta, index) => (
               <img
-                key={item.image}
+                key={meta.image}
                 className={active === index ? "is-active" : ""}
-                src={item.image}
-                style={{ objectPosition: item.focus }}
-                alt={active === index ? item.alt : ""}
+                src={meta.image}
+                style={{ objectPosition: meta.focus }}
+                alt={active === index ? benefits[index].alt : ""}
                 aria-hidden={active !== index}
                 width="1536"
                 height="1024"
@@ -281,9 +289,9 @@ function WhoFor() {
             <p>{benefits[active].copy}</p>
           </div>
         </div>
-        <div className="who-tabs" role="tablist" aria-label="Benefit topics">
+        <div className="who-tabs" role="tablist" aria-label={t.who.tabsAriaLabel}>
           {benefits.map((item, index) => (
-            <button key={item.title} id={`${tabsId}-tab-${index}`} role="tab" aria-controls={`${tabsId}-panel`} aria-selected={active === index} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={(event) => {
+            <button key={benefitMeta[index].image} id={`${tabsId}-tab-${index}`} role="tab" aria-controls={`${tabsId}-panel`} aria-selected={active === index} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={(event) => {
               if (event.key === "ArrowRight") { event.preventDefault(); moveTab(index + 1); }
               if (event.key === "ArrowLeft") { event.preventDefault(); moveTab(index - 1); }
               if (event.key === "Home") { event.preventDefault(); moveTab(0); }
@@ -299,72 +307,73 @@ function WhoFor() {
 }
 
 function ProductCard({ product }: { product: Product }) {
+  const t = useT();
+  const info = t.products.byId[product.id];
   return (
     <article className={`product-card product-card--${product.id}`} data-reveal>
       <div className="product-card__visual">
         <span className="product-card__index">{product.id} MG</span>
-        <img src={product.image} alt={`Driada Medical Retatrutide ${product.dosage} packaging`} width="1400" height="933" loading="eager" />
+        <img src={product.image} alt={`${t.products.imgAltPrefix}${product.dosage}${t.products.imgAltSuffix}`} width="1400" height="933" loading="eager" />
       </div>
       <div className="product-card__body">
-        <div className="product-card__meta"><span><i /> In stock</span>{product.lab.href
-          ? <a href={product.lab.href}>{product.lab.label}</a>
-          : <em>{product.lab.label}</em>}</div>
-        <Eyebrow>Driada Medical · {product.accent}</Eyebrow>
+        <div className="product-card__meta"><span><i /> {t.common.inStock}</span>{product.labHref
+          ? <a href={product.labHref}>{info.labLabel}</a>
+          : <em>{info.labLabel}</em>}</div>
+        <Eyebrow>Driada Medical · {info.accent}</Eyebrow>
         <h3>Retatrutide</h3>
         <p className="product-card__dose">{product.dosage}</p>
-        <div className="product-card__price"><strong>{product.price}</strong><s>{product.original}</s><span>{product.saving}</span></div>
+        <div className="product-card__price"><strong>{product.price}</strong><s>{product.original}</s><span>{t.common.savingBadge}</span></div>
         <dl>
-          <div><dt>Composition</dt><dd>Retatrutide {product.id} mg</dd></div>
-          <div><dt>Category</dt><dd>Peptide</dd></div>
-          <div><dt>Purpose</dt><dd>Weight loss</dd></div>
-          <div><dt>Form</dt><dd>Vial with lyophilised powder + {product.water}</dd></div>
-          <div><dt>Administration</dt><dd>Subcutaneous injections</dd></div>
+          <div><dt>{t.products.composition}</dt><dd>Retatrutide {product.id} mg</dd></div>
+          <div><dt>{t.products.category}</dt><dd>{t.products.categoryValue}</dd></div>
+          <div><dt>{t.products.purpose}</dt><dd>{t.products.purposeValue}</dd></div>
+          <div><dt>{t.products.form}</dt><dd>{t.products.formPrefix}{info.water}</dd></div>
+          <div><dt>{t.products.administration}</dt><dd>{t.products.administrationValue}</dd></div>
         </dl>
-        <div className="product-card__actions"><a className="button button--dark" href={checkoutHref(product, product.bundles[0])}>Buy now<Arrow /></a><a className="button button--ghost" href={CONSULT_URL}>Consult an expert<Arrow /></a></div>
+        <div className="product-card__actions"><a className="button button--dark" href={checkoutHref(product, product.bundles[0])}>{t.common.buyNow}<Arrow /></a><a className="button button--ghost" href={CONSULT_URL}>{t.common.consultExpert}<Arrow /></a></div>
       </div>
     </article>
   );
 }
 
 function PricingGroup({ product }: { product: Product }) {
+  const t = useT();
+  const info = t.products.byId[product.id];
   return (
     <section className={`pricing-group pricing-group--${product.id}`} aria-labelledby={`pricing-${product.id}`} data-reveal>
       <header>
         <div><span>{product.id}</span><p>Driada Medical</p></div>
-        <div><h3 id={`pricing-${product.id}`}>Retatrutide {product.id} mg</h3><p>Choose the quantity that fits your plan.</p></div>
-        <strong className="pricing-group__unit">{product.price}<small> / unit</small></strong>
+        <div><h3 id={`pricing-${product.id}`}>Retatrutide {product.id} mg</h3><p>{t.products.choosePlan}</p></div>
+        <strong className="pricing-group__unit">{product.price}<small> {t.common.perUnit}</small></strong>
       </header>
       <div className="pricing-rows">
-        {product.bundles.map((bundle) => (
-          <article key={bundle.name} className={bundle.popular ? "is-popular" : ""}>
-            <div className="pricing-name"><strong>{bundle.name}</strong><small>{bundle.supply}</small></div>
-            <div className="pricing-total"><strong>{bundle.price}</strong><s>{bundle.original}</s></div>
-            <div className="pricing-value"><span>{bundle.unit}</span><span>{bundle.saving}</span></div>
-            <a className="button button--dark" href={checkoutHref(product, bundle)}>Choose {bundle.quantity} {bundle.quantity === 1 ? "unit" : "units"}<Arrow /></a>
-          </article>
-        ))}
+        {product.bundles.map((bundle) => {
+          const bundleInfo = info.bundles[bundle.id];
+          return (
+            <article key={bundle.id} className={bundle.popular ? "is-popular" : ""}>
+              <div className="pricing-name"><strong>{bundleInfo.name}</strong><small>{bundleInfo.supply}</small></div>
+              <div className="pricing-total"><strong>{bundle.price}</strong><s>{bundle.original}</s></div>
+              <div className="pricing-value"><span>{bundle.unit} {t.common.perUnit}</span><span>{t.common.savingBadge}</span></div>
+              <a className="button button--dark" href={checkoutHref(product, bundle)}>{t.common.chooseButton(bundle.quantity)}<Arrow /></a>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
 }
 
-const paymentDeliveryPoints = [
-  { label: "EU Delivery", copy: "Delivery options are available across supported EU destinations." },
-  { label: "Dispatch", copy: "Order processing and dispatch details are confirmed as part of checkout." },
-  { label: "Payment Methods", copy: "Available payment options are presented on the checkout page." },
-  { label: "Tracking", copy: "Tracking is provided where offered by the selected shipping method." },
-] as const;
-
 function PaymentDelivery() {
+  const t = useT();
   return (
     <div className="payment-delivery" data-reveal>
       <div className="payment-delivery__head">
-        <Eyebrow>Payment & delivery</Eyebrow>
-        <p>What to expect once you check out.</p>
+        <Eyebrow>{t.paymentDelivery.eyebrow}</Eyebrow>
+        <p>{t.paymentDelivery.subtitle}</p>
       </div>
       <div className="payment-delivery__grid">
-        {paymentDeliveryPoints.map((point, index) => (
-          <div key={point.label}>
+        {t.paymentDelivery.points.map((point, index) => (
+          <div key={index}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <strong>{point.label}</strong>
             <p>{point.copy}</p>
@@ -376,21 +385,20 @@ function PaymentDelivery() {
 }
 
 function Products() {
+  const t = useT();
   return (
     <section className="section products" id="products">
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
-          <div><Eyebrow>Two product options</Eyebrow><h2>Choose your<br />Retatrutide.</h2></div>
-          <p><span>Two Driada Medical formats, shown at their real proportions and with their individual pricing.</span></p>
+          <div><Eyebrow>{t.products.eyebrow}</Eyebrow><h2>{t.products.titleLine1}<br />{t.products.titleLine2}</h2></div>
+          <p><span>{t.products.description}</span></p>
         </div>
         <div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} />)}</div>
-        <div className="pricing-heading" data-reveal><Eyebrow>Quantity & price</Eyebrow><h2>One clear choice at a time.</h2></div>
+        <div className="pricing-heading" data-reveal><Eyebrow>{t.products.quantityEyebrow}</Eyebrow><h2>{t.products.quantityTitle}</h2></div>
         <div className="pricing-stack">{products.map((product) => <PricingGroup key={product.id} product={product} />)}</div>
         <aside className="storage" data-reveal>
-          <div><Eyebrow>Storage & safety</Eyebrow><h3>Keep it stable.</h3></div>
-          <ul>
-            <li>Keep refrigerated at 2–8°C (36–46°F).</li><li>Do not freeze.</li><li>Protect from light.</li><li>Avoid frequent temperature changes.</li><li>Once reconstituted, refrigerate and use within approximately one month.</li>
-          </ul>
+          <div><Eyebrow>{t.storage.eyebrow}</Eyebrow><h3>{t.storage.title}</h3></div>
+          <ul>{t.storage.items.map((item, index) => <li key={index}>{item}</li>)}</ul>
         </aside>
         <PaymentDelivery />
       </div>
@@ -399,24 +407,25 @@ function Products() {
 }
 
 function Quality({ onOpen }: { onOpen: () => void }) {
+  const t = useT();
   return (
     <section className="section quality" id="quality">
       <div className="section-shell">
         <div className="section-heading split-heading" data-reveal>
-          <div><Eyebrow>Quality & authenticity</Eyebrow><h2>Documentation<br />you can inspect.</h2></div>
-          <p><span>The supplied laboratory report is presented with the product identity and batch information so the available material can be reviewed directly.</span></p>
+          <div><Eyebrow>{t.quality.eyebrow}</Eyebrow><h2>{t.quality.titleLine1}<br />{t.quality.titleLine2}</h2></div>
+          <p><span>{t.quality.description}</span></p>
         </div>
         <div className="quality-card" data-reveal>
-          <button className="quality-preview" type="button" onClick={onOpen} aria-label="Open laboratory report">
-            <img src="assets/documents/retatrutide-lab-report.png" alt="Preview of laboratory report for Retatrutide batch 82188" width="725" height="1107" loading="lazy" />
-            <span>Open document<Arrow /></span>
+          <button className="quality-preview" type="button" onClick={onOpen} aria-label={t.quality.openReportAriaLabel}>
+            <img src="assets/documents/retatrutide-lab-report.png" alt={t.quality.previewAlt} width="725" height="1107" loading="lazy" />
+            <span>{t.quality.openDocument}<Arrow /></span>
           </button>
           <div className="quality-data">
-            <span className="status-pill"><i /> Document available</span>
-            <h3>Laboratory analysis report</h3>
-            <dl><div><dt>Report date</dt><dd>24 June 2026</dd></div><div><dt>Batch</dt><dd>82188</dd></div><div><dt>Reported content</dt><dd>10.77 mg</dd></div><div><dt>Reported purity</dt><dd>99%</dd></div></dl>
-            <button className="button button--dark" type="button" onClick={onOpen}>View laboratory report<Arrow /></button>
-            <p>Independent third-party laboratory test. Values are reproduced from the supplied document; review the full report before relying on individual figures.</p>
+            <span className="status-pill"><i /> {t.quality.documentAvailable}</span>
+            <h3>{t.quality.reportTitle}</h3>
+            <dl><div><dt>{t.quality.reportDate}</dt><dd>{t.quality.reportDateValue}</dd></div><div><dt>{t.quality.batch}</dt><dd>82188</dd></div><div><dt>{t.quality.reportedContent}</dt><dd>10.77 mg</dd></div><div><dt>{t.quality.reportedPurity}</dt><dd>99%</dd></div></dl>
+            <button className="button button--dark" type="button" onClick={onOpen}>{t.quality.viewReport}<Arrow /></button>
+            <p>{t.quality.disclaimer}</p>
           </div>
         </div>
       </div>
@@ -425,28 +434,31 @@ function Quality({ onOpen }: { onOpen: () => void }) {
 }
 
 function Reviews() {
+  const t = useT();
   return (
     <section className="section reviews" id="reviews">
       <div className="section-shell">
-        <div className="reviews-heading" data-reveal><div><Eyebrow>Verified forum reviews</Eyebrow><h2>What customers say.</h2></div><a href={REVIEW_URL}><strong>4.92 / 5</strong><span>★★★★★</span><small>36 reviews<Arrow /></small></a></div>
-        <div className="review-grid">{reviews.map(([name, date, body], index) => <a href={REVIEW_URL} className="review-card" key={name} data-reveal><div><span>{String(index + 1).padStart(2, "0")}</span><span>★★★★★</span></div><blockquote>“{body}”</blockquote><footer><strong>{name}</strong><time>{date}</time></footer></a>)}</div>
+        <div className="reviews-heading" data-reveal><div><Eyebrow>{t.reviews.eyebrow}</Eyebrow><h2>{t.reviews.title}</h2></div><a href={REVIEW_URL}><strong>4.92 / 5</strong><span>★★★★★</span><small>36 {t.reviews.reviewsLabel}<Arrow /></small></a></div>
+        <div className="review-grid">{reviewMeta.map((meta, index) => <a href={REVIEW_URL} className="review-card" key={meta.name} data-reveal><div><span>{String(index + 1).padStart(2, "0")}</span><span>★★★★★</span></div><blockquote>“{t.reviews.body[index]}”</blockquote><footer><strong>{meta.name}</strong><time>{meta.date}</time></footer></a>)}</div>
       </div>
     </section>
   );
 }
 
 function FAQ() {
+  const t = useT();
   return (
     <section className="section faq" id="faq">
       <div className="section-shell faq-grid">
-        <div className="faq-heading" data-reveal><Eyebrow>FAQ</Eyebrow><h2>Questions,<br />answered.</h2><p>Need product or order support?</p><a className="text-link" href={CONSULT_URL}>Consult an expert<Arrow /></a></div>
-        <div className="faq-list">{faqs.map(([question, answer], index) => <details key={question} open={index === 0} data-reveal><summary><span>{String(index + 1).padStart(2, "0")}</span>{question}<i /></summary><p>{answer}</p></details>)}</div>
+        <div className="faq-heading" data-reveal><Eyebrow>{t.faq.eyebrow}</Eyebrow><h2>{t.faq.titleLine1}<br />{t.faq.titleLine2}</h2><p>{t.faq.needSupport}</p><a className="text-link" href={CONSULT_URL}>{t.common.consultExpert}<Arrow /></a></div>
+        <div className="faq-list">{t.faq.items.map((item, index) => <details key={index} open={index === 0} data-reveal><summary><span>{String(index + 1).padStart(2, "0")}</span>{item.q}<i /></summary><p>{item.a}</p></details>)}</div>
       </div>
     </section>
   );
 }
 
 function ReportDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const t = useT();
   const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -456,8 +468,8 @@ function ReportDialog({ open, onClose }: { open: boolean; onClose: () => void })
   }, [open]);
   return (
     <dialog ref={dialogRef} className="report-dialog" onClose={onClose} onClick={(event) => { if (event.target === dialogRef.current) onClose(); }}>
-      <header><strong>Laboratory analysis report</strong><button type="button" onClick={onClose} aria-label="Close report">×</button></header>
-      <img src="assets/documents/retatrutide-lab-report.png" alt="Laboratory analysis report for Driada Medical Retatrutide batch 82188" width="725" height="1107" />
+      <header><strong>{t.reportDialog.title}</strong><button type="button" onClick={onClose} aria-label={t.reportDialog.closeAriaLabel}>×</button></header>
+      <img src="assets/documents/retatrutide-lab-report.png" alt={t.reportDialog.imgAlt} width="725" height="1107" />
     </dialog>
   );
 }

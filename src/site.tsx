@@ -1,5 +1,6 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { nav } from "./content";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { navKeys } from "./content";
+import { locales, localeLabels, localeNames, useLocale, useT } from "./i18n";
 
 export const CONSULT_URL = "https://driadashop.helpline.to/en-US/new-ticket";
 export const REVIEW_URL = "https://peds.to/reviews/retatrutide.157/reviews";
@@ -15,10 +16,69 @@ export function Eyebrow({ children }: { children: ReactNode }) {
   return <p className="eyebrow"><span />{children}</p>;
 }
 
+// Compact dropdown used in the desktop header-actions row (hidden on mobile by
+// the same CSS that hides .header-actions there).
+function LanguageSwitcher() {
+  const { locale, setLocale } = useLocale();
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div className="lang-switch" ref={rootRef}>
+      <button type="button" className="lang-switch__trigger" aria-haspopup="listbox" aria-expanded={open} aria-label={t.languageSwitcher.ariaLabel} onClick={() => setOpen((value) => !value)}>
+        {localeLabels[locale]}<i />
+      </button>
+      {open && (
+        <ul className="lang-switch__menu" role="listbox" aria-label={t.languageSwitcher.ariaLabel}>
+          {locales.map((code) => (
+            <li key={code}>
+              <button type="button" role="option" aria-selected={code === locale} className={code === locale ? "is-active" : ""} onClick={() => { setLocale(code); setOpen(false); }}>
+                <span>{localeLabels[code]}</span><small>{localeNames[code]}</small>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// Flat row of language buttons shown inside the mobile nav panel — a dropdown-inside-a-
+// dropdown is fiddly to tap accurately, so mobile gets direct one-tap selection instead.
+function LanguageRow() {
+  const { locale, setLocale } = useLocale();
+  const t = useT();
+  return (
+    <div className="lang-row" role="group" aria-label={t.languageSwitcher.ariaLabel}>
+      {locales.map((code) => (
+        <button key={code} type="button" className={code === locale ? "is-active" : ""} aria-pressed={code === locale} onClick={() => setLocale(code)}>
+          {localeLabels[code]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // basePath is "" on the landing page (in-page anchors) or "./index.html" from another
 // page (e.g. checkout.html), so nav/CTA links always resolve to the right document.
 export function Header({ basePath = "" }: { basePath?: string }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   useEffect(() => {
     if (!open) return;
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
@@ -27,36 +87,40 @@ export function Header({ basePath = "" }: { basePath?: string }) {
   }, [open]);
   return (
     <header className="site-header">
-      <a className="wordmark" href={`${basePath}#top`} aria-label="Retatrutide home">RETATRUTIDE</a>
+      <a className="wordmark" href={`${basePath}#top`} aria-label={t.header.homeAriaLabel}>RETATRUTIDE</a>
       <button className="menu-button" type="button" aria-expanded={open} aria-controls="site-nav" onClick={() => setOpen(!open)}>
-        <span>{open ? "Close" : "Menu"}</span><i /><i />
+        <span>{open ? t.header.close : t.header.menu}</span><i /><i />
       </button>
-      <nav id="site-nav" className={open ? "nav is-open" : "nav"} aria-label="Main navigation">
-        {nav.map(([label, href]) => <a key={href} href={`${basePath}${href}`} onClick={() => setOpen(false)}>{label}</a>)}
+      <nav id="site-nav" className={open ? "nav is-open" : "nav"} aria-label={t.header.navAriaLabel}>
+        {navKeys.map((key) => <a key={key} href={`${basePath}#${key}`} onClick={() => setOpen(false)}>{t.header.nav[key]}</a>)}
+        <LanguageRow />
       </nav>
       <div className="header-actions">
-        <a className="button button--ghost" href={CONSULT_URL}>Consult an expert<Arrow /></a>
-        <a className="button button--dark" href={`${basePath}#products`}>Buy now<Arrow /></a>
+        <LanguageSwitcher />
+        <a className="button button--ghost" href={CONSULT_URL}>{t.common.consultExpert}<Arrow /></a>
+        <a className="button button--dark" href={`${basePath}#products`}>{t.common.buyNow}<Arrow /></a>
       </div>
     </header>
   );
 }
 
 export function Footer({ basePath = "" }: { basePath?: string }) {
+  const t = useT();
   return (
     <footer className="site-footer" data-dark>
       <div className="footer-signal" aria-hidden="true">RETATRUTIDE</div>
       <div className="footer-grid">
-        <div><a className="wordmark" href={`${basePath}#top`}>RETATRUTIDE</a><p>Product information, documentation and the next purchasing step in one place.</p><div><a className="button button--light" href={CONSULT_URL}>Consult an expert<Arrow /></a><a className="button button--metal" href={`${basePath}#products`}>Buy now<Arrow /></a></div></div>
-        <nav aria-label="Footer"><strong>Explore</strong>{nav.map(([label, href]) => <a key={href} href={`${basePath}${href}`}>{label}</a>)}</nav>
-        <div className="footer-meta"><strong>Independent sources</strong><a href={REVIEW_URL}>Forum reviews<Arrow /></a><a href="https://www.eroids.com/reviews/driadashop.to">DriadaShop reviews<Arrow /></a><button type="button" onClick={() => window.dispatchEvent(new Event("retatrutide:open-cookie-settings"))}>Cookie settings</button></div>
+        <div><a className="wordmark" href={`${basePath}#top`}>RETATRUTIDE</a><p>{t.footer.tagline}</p><div><a className="button button--light" href={CONSULT_URL}>{t.common.consultExpert}<Arrow /></a><a className="button button--metal" href={`${basePath}#products`}>{t.common.buyNow}<Arrow /></a></div></div>
+        <nav aria-label={t.footer.footerNavAriaLabel}><strong>{t.footer.exploreLabel}</strong>{navKeys.map((key) => <a key={key} href={`${basePath}#${key}`}>{t.header.nav[key]}</a>)}</nav>
+        <div className="footer-meta"><strong>{t.footer.sourcesLabel}</strong><a href={REVIEW_URL}>{t.footer.forumReviews}<Arrow /></a><a href="https://www.eroids.com/reviews/driadashop.to">{t.footer.driadaShopReviews}<Arrow /></a><button type="button" onClick={() => window.dispatchEvent(new Event("retatrutide:open-cookie-settings"))}>{t.footer.cookieSettings}</button></div>
       </div>
-      <div className="footer-bottom"><p>Early studies show Retatrutide is generally well tolerated, but long-term data is limited. A doctor’s prescription is required.</p><span>© 2026 Retatrutide</span><div className="footer-bottom-links"><a href={POLICY_URL}>Policy</a><a href={`${basePath}#top`}>Back to top ↑</a></div></div>
+      <div className="footer-bottom"><p>{t.footer.disclaimer}</p><span>© 2026 Retatrutide</span><div className="footer-bottom-links"><a href={POLICY_URL}>{t.footer.policy}</a><a href={`${basePath}#top`}>{t.footer.backToTop}</a></div></div>
     </footer>
   );
 }
 
 export function CookieBanner() {
+  const t = useT();
   const consentKey = "retatrutide-essential-cookie-choice";
   const dismissedKey = "retatrutide-cookie-notice-dismissed";
   const [visible, setVisible] = useState(() => {
@@ -70,9 +134,9 @@ export function CookieBanner() {
   }, []);
   if (!visible) return null;
   return (
-    <aside className="cookie-banner" aria-label="Cookie notice" aria-live="polite">
-      <p><strong>Your privacy matters.</strong> This site uses essential cookies only.</p>
-      <div><button type="button" onClick={() => { try { sessionStorage.setItem(dismissedKey, "true"); } catch { /* storage can be unavailable */ } setVisible(false); }}>Dismiss</button><button type="button" onClick={() => { try { localStorage.setItem(consentKey, "accepted"); } catch { /* storage can be unavailable */ } setVisible(false); }}>Accept essential</button></div>
+    <aside className="cookie-banner" aria-label={t.cookieBanner.ariaLabel} aria-live="polite">
+      <p><strong>{t.cookieBanner.title}</strong> {t.cookieBanner.message}</p>
+      <div><button type="button" onClick={() => { try { sessionStorage.setItem(dismissedKey, "true"); } catch { /* storage can be unavailable */ } setVisible(false); }}>{t.cookieBanner.dismiss}</button><button type="button" onClick={() => { try { localStorage.setItem(consentKey, "accepted"); } catch { /* storage can be unavailable */ } setVisible(false); }}>{t.cookieBanner.accept}</button></div>
     </aside>
   );
 }

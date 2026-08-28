@@ -63,14 +63,31 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 .site-header.is-inverted .button--dark:hover { background: #e6c9b6; }
 .site-header.is-inverted .menu-button span { color: #f4f5f2; }
 .site-header.is-inverted .menu-button i { background: #f4f5f2; }
+.site-header.is-inverted .lang-switch__trigger { color: #f4f5f2; border-color: rgba(255,255,255,.32); background: rgba(255,255,255,.09); }
+.site-header.is-inverted .lang-switch__trigger:hover { border-color: #fff; }
 .wordmark { min-height: 44px; display: inline-flex; align-items: center; font-family: Georgia, serif; font-size: 16px; letter-spacing: .22em; }
 .nav { display: flex; align-items: center; gap: 28px; }
 .nav a { position: relative; min-height: 44px; display: inline-flex; align-items: center; color: #4e514c; font-size: 14px; font-weight: 500; }
 .nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -8px; height: 1px; background: #111; transition: right .25s ease; }
 .nav a:hover::after { right: 0; }
-.header-actions { justify-self: end; display: flex; gap: 8px; }
+.header-actions { justify-self: end; display: flex; align-items: center; gap: 8px; }
 .header-actions .button { min-height: 44px; }
 .menu-button { display: none; }
+
+.lang-switch { position: relative; }
+.lang-switch__trigger { min-height: 44px; padding: 0 14px; border: 1px solid rgba(20,21,19,.16); border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.42); color: #1a1b18; font-size: 12px; font-weight: 700; letter-spacing: .04em; cursor: pointer; transition: border-color .2s ease, background .2s ease; }
+.lang-switch__trigger:hover { border-color: #1a1b18; }
+.lang-switch__trigger i { width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .2s ease; }
+.lang-switch__trigger[aria-expanded="true"] i { transform: rotate(-135deg) translateY(1px); }
+.lang-switch__menu { position: absolute; z-index: 60; top: calc(100% + 10px); right: 0; width: 178px; margin: 0; padding: 8px; list-style: none; border: 1px solid rgba(20,21,19,.14); border-radius: 16px; background: rgba(249,249,246,.98); box-shadow: 0 20px 50px rgba(20,21,19,.16); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.lang-switch__menu li + li { margin-top: 2px; }
+.lang-switch__menu button { width: 100%; min-height: 40px; padding: 6px 10px; border: 0; border-radius: 10px; display: flex; align-items: baseline; gap: 8px; color: #1a1b18; background: none; text-align: left; font: inherit; cursor: pointer; transition: background .15s ease; }
+.lang-switch__menu button:hover { background: rgba(20,21,19,.06); }
+.lang-switch__menu button span { font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+.lang-switch__menu button small { color: #83867f; font-size: 11px; }
+.lang-switch__menu button.is-active { background: #181917; color: #fff; }
+.lang-switch__menu button.is-active small { color: #c7cac4; }
+.lang-row { display: none; }
 
 .hero { position: relative; min-height: 792px; padding: 104px max(32px, calc((100vw - 1376px)/2)) 88px; overflow: hidden; background: linear-gradient(132deg, #fbfbf8 0%, #eeefec 46%, #d8dad7 100%); }
 .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 46% at 86% 82%, rgba(255,255,255,.85), transparent 70%); mix-blend-mode: soft-light; }
@@ -414,6 +431,9 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
   .menu-button span { font-size: 11px; }
   .menu-button i { display: block; width: 4px; height: 4px; border-radius: 50%; background: #111; }
   .header-actions { display: none; }
+  .lang-row { margin-top: 6px; padding: 14px 4px 4px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .lang-row button { min-height: 40px; padding: 0 15px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.6); color: #1a1b18; font-size: 12px; font-weight: 700; letter-spacing: .04em; cursor: pointer; transition: background .2s ease, color .2s ease, border-color .2s ease; }
+  .lang-row button.is-active { color: #fff; background: #181917; border-color: #181917; }
   .hero { min-height: 0; padding-bottom: 76px; }
   .hero h1 { font-size: clamp(96px, 15.4vw, 178px); }
   .hero-intro { gap: 6vw; }
