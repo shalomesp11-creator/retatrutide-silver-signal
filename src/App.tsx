@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { benefits, faqs, nav, products, receptors, reviews, type Product } from "./content";
 
 const CART_ENDPOINT = "https://driadashop.to/index.php?route=external/cart/add";
@@ -109,12 +109,105 @@ function TrustRail() {
 }
 
 function Transformation() {
-  // The slider is a progress amount, not a split: at 0 the fuller figure is shown,
-  // and raising it dissolves through to the slimmer one. Desktop demonstrates this
-  // on its own until the visitor takes over; mobile is manual only.
   const [progress, setProgress] = useState(0);
   const [manual, setManual] = useState(false);
+  const progressRef = useRef(0);
+  const phaseRef = useRef(0);
+  const manualRef = useRef(false);
+  const trackRef = useRef<HTMLDivElement>(null);
   const labelId = useId();
+
+  const commitProgress = (nextProgress: number) => {
+    const next = Math.min(100, Math.max(0, nextProgress));
+    progressRef.current = next;
+    setProgress(next);
+  };
+
+  const takeControl = () => {
+    if (manualRef.current) return;
+    manualRef.current = true;
+    setManual(true);
+  };
+
+  const updateFromPointer = (clientY: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const bounds = track.getBoundingClientRect();
+    commitProgress(((bounds.bottom - clientY) / bounds.height) * 100);
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !event.isPrimary) return;
+    event.preventDefault();
+    takeControl();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    updateFromPointer(event.clientY);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+    event.preventDefault();
+    updateFromPointer(event.clientY);
+  };
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const commands: Record<string, number> = {
+      ArrowUp: 2,
+      ArrowRight: 2,
+      ArrowDown: -2,
+      ArrowLeft: -2,
+      PageUp: 10,
+      PageDown: -10,
+    };
+    if (event.key === "Home" || event.key === "End") {
+      event.preventDefault();
+      takeControl();
+      commitProgress(event.key === "Home" ? 0 : 100);
+      return;
+    }
+    const adjustment = commands[event.key];
+    if (adjustment === undefined) return;
+    event.preventDefault();
+    takeControl();
+    commitProgress(progressRef.current + adjustment);
+  };
+
+  useEffect(() => {
+    if (manual) return;
+    const desktop = window.matchMedia("(min-width: 761px)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let animationFrame = 0;
+    let previousTime = 0;
+
+    const animate = (time: number) => {
+      if (manualRef.current || !desktop.matches || reducedMotion.matches) return;
+      if (previousTime) {
+        const elapsed = Math.min(time - previousTime, 48);
+        phaseRef.current = (phaseRef.current + elapsed * ((Math.PI * 2) / 9200)) % (Math.PI * 2);
+        commitProgress(50 - Math.cos(phaseRef.current) * 50);
+      }
+      previousTime = time;
+      animationFrame = window.requestAnimationFrame(animate);
+    };
+
+    const syncAnimation = () => {
+      window.cancelAnimationFrame(animationFrame);
+      previousTime = 0;
+      if (desktop.matches && !reducedMotion.matches && !manualRef.current) {
+        animationFrame = window.requestAnimationFrame(animate);
+      }
+    };
+
+    syncAnimation();
+    desktop.addEventListener("change", syncAnimation);
+    reducedMotion.addEventListener("change", syncAnimation);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      desktop.removeEventListener("change", syncAnimation);
+      reducedMotion.removeEventListener("change", syncAnimation);
+    };
+  }, [manual]);
+
   return (
     <div
       className={manual ? "transformation is-manual" : "transformation"}
@@ -123,13 +216,24 @@ function Transformation() {
       <div className="transformation-frame">
         <img className="transformation-before" src="assets/people/transformation-start-v2.webp" alt="Woman at the start of an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
         <img className="transformation-after" src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
-        <div className="transformation-labels" aria-hidden="true"><span>Start</span><span>Progress</span></div>
       </div>
-      <div className="transformation-control">
+      <span id={labelId} className="sr-only">Drag vertically from Start to Progress to move from the fuller starting figure to the slimmer progress figure</span>
+      <div
+        className="transformation-control"
+        role="slider"
+        tabIndex={0}
+        aria-labelledby={labelId}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress)}
+        aria-valuetext={`${Math.round(progress)}% progress`}
+        aria-orientation="vertical"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onKeyDown={handleKeyDown}
+      >
         <div className="transformation-control__labels" aria-hidden="true"><span>Progress</span><span>Start</span></div>
-        <div className="transformation-track" aria-hidden="true"><i /><b /></div>
-        <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Drag from Start to Progress to move from the fuller starting figure to the slimmer progress figure</label>
-        <input id={`${labelId}-range`} type="range" min="0" max="100" step="0.1" value={progress} aria-labelledby={labelId} onPointerDown={() => setManual(true)} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setProgress(Number(event.currentTarget.value)); }} />
+        <div ref={trackRef} className="transformation-track" aria-hidden="true"><i /><b><span /></b></div>
       </div>
     </div>
   );
