@@ -126,8 +126,9 @@ function Transformation() {
         <div className="transformation-labels" aria-hidden="true"><span>Start</span><span>Progress</span></div>
       </div>
       <div className="transformation-control">
+        <div className="transformation-control__labels" aria-hidden="true"><span>Progress</span><span>Start</span></div>
         <div className="transformation-track" aria-hidden="true"><i /><b /></div>
-        <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Drag to move from the fuller starting figure on the left to the slimmer progress figure on the right</label>
+        <label id={labelId} className="sr-only" htmlFor={`${labelId}-range`}>Drag from Start to Progress to move from the fuller starting figure to the slimmer progress figure</label>
         <input id={`${labelId}-range`} type="range" min="0" max="100" step="0.1" value={progress} aria-labelledby={labelId} onPointerDown={() => setManual(true)} onInput={(event: FormEvent<HTMLInputElement>) => { setManual(true); setProgress(Number(event.currentTarget.value)); }} />
       </div>
     </div>
