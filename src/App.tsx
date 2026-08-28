@@ -129,11 +129,11 @@ function Transformation() {
     setManual(true);
   };
 
-  const updateFromPointer = (clientY: number) => {
+  const updateFromPointer = (clientX: number) => {
     const track = trackRef.current;
     if (!track) return;
     const bounds = track.getBoundingClientRect();
-    commitProgress(((bounds.bottom - clientY) / bounds.height) * 100);
+    commitProgress(((clientX - bounds.left) / bounds.width) * 100);
   };
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -141,13 +141,13 @@ function Transformation() {
     event.preventDefault();
     takeControl();
     event.currentTarget.setPointerCapture(event.pointerId);
-    updateFromPointer(event.clientY);
+    updateFromPointer(event.clientX);
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
     event.preventDefault();
-    updateFromPointer(event.clientY);
+    updateFromPointer(event.clientX);
   };
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -217,7 +217,8 @@ function Transformation() {
         <img className="transformation-before" src="assets/people/transformation-start-v2.webp" alt="Woman at the start of an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
         <img className="transformation-after" src="assets/people/transformation-progress-v2.webp" alt="The same woman after an illustrative body-composition transformation" width="900" height="1350" decoding="async" />
       </div>
-      <span id={labelId} className="sr-only">Drag vertically from Start to Progress to move from the fuller starting figure to the slimmer progress figure</span>
+      <div className="transformation-labels" aria-hidden="true"><span>Start</span><span>Progress</span></div>
+      <span id={labelId} className="sr-only">Drag horizontally from Start to Progress to move from the fuller starting figure to the slimmer progress figure</span>
       <div
         className="transformation-control"
         role="slider"
@@ -227,12 +228,11 @@ function Transformation() {
         aria-valuemax={100}
         aria-valuenow={Math.round(progress)}
         aria-valuetext={`${Math.round(progress)}% progress`}
-        aria-orientation="vertical"
+        aria-orientation="horizontal"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onKeyDown={handleKeyDown}
       >
-        <div className="transformation-control__labels" aria-hidden="true"><span>Progress</span><span>Start</span></div>
         <div ref={trackRef} className="transformation-track" aria-hidden="true"><i /><b><span /></b></div>
       </div>
     </div>
