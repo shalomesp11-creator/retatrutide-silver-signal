@@ -87,7 +87,7 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 .lang-switch__menu button small { color: #83867f; font-size: 11px; }
 .lang-switch__menu button.is-active { background: #181917; color: #fff; }
 .lang-switch__menu button.is-active small { color: #c7cac4; }
-.lang-row { display: none; }
+.lang-switch--mobile { display: none; }
 
 .hero { position: relative; min-height: 792px; padding: 104px max(32px, calc((100vw - 1376px)/2)) 88px; overflow: hidden; background: linear-gradient(132deg, #fbfbf8 0%, #eeefec 46%, #d8dad7 100%); }
 .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 46% at 86% 82%, rgba(255,255,255,.85), transparent 70%); mix-blend-mode: soft-light; }
@@ -422,7 +422,7 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 
 @media (max-width: 1100px) {
   :root { --shell: calc(100vw - 40px); }
-  .site-header { grid-template-columns: 1fr auto; }
+  .site-header { grid-template-columns: 1fr auto auto; column-gap: 8px; }
   .nav { position: absolute; top: 72px; left: 0; right: 0; padding: 10px; gap: 0; border: 1px solid var(--line); border-radius: 18px; display: none; flex-direction: column; align-items: stretch; background: rgba(249,249,246,.97); box-shadow: 0 20px 50px rgba(20,21,19,.12); }
   .nav.is-open { display: flex; }
   .nav a { padding: 12px; border-bottom: 1px solid var(--line); }
@@ -431,9 +431,9 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
   .menu-button span { font-size: 11px; }
   .menu-button i { display: block; width: 4px; height: 4px; border-radius: 50%; background: #111; }
   .header-actions { display: none; }
-  .lang-row { margin-top: 6px; padding: 14px 4px 4px; display: flex; flex-wrap: wrap; gap: 8px; }
-  .lang-row button { min-height: 40px; padding: 0 15px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.6); color: #1a1b18; font-size: 12px; font-weight: 700; letter-spacing: .04em; cursor: pointer; transition: background .2s ease, color .2s ease, border-color .2s ease; }
-  .lang-row button.is-active { color: #fff; background: #181917; border-color: #181917; }
+  .lang-switch--mobile { display: block; }
+  .lang-switch--mobile .lang-switch__trigger { min-height: 44px; padding: 0 10px; font-size: 11px; }
+  .lang-switch--mobile .lang-switch__menu { top: calc(100% + 14px); }
   .hero { min-height: 0; padding-bottom: 76px; }
   .hero h1 { font-size: clamp(96px, 15.4vw, 178px); }
   .hero-intro { gap: 6vw; }

@@ -16,38 +16,40 @@ export function Eyebrow({ children }: { children: ReactNode }) {
   return <p className="eyebrow"><span />{children}</p>;
 }
 
-// Compact dropdown used in the desktop header-actions row (hidden on mobile by
-// the same CSS that hides .header-actions there).
-function LanguageSwitcher() {
+// Same dropdown is rendered twice — once (desktop) inside .header-actions, once
+// (mobile) standalone in the top bar between the wordmark and Menu — each hidden by
+// CSS at the other breakpoint. Both share Header's lifted open state, so opening
+// either one also closes the mobile nav panel (see Header below) instead of the two
+// overlapping.
+function LanguageSwitcher({ open, onOpenChange, className = "" }: { open: boolean; onOpenChange: (open: boolean) => void; className?: string }) {
   const { locale, setLocale } = useLocale();
   const t = useT();
-  const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) setOpen(false);
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) onOpenChange(false);
     };
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") onOpenChange(false); };
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [open, onOpenChange]);
 
   return (
-    <div className="lang-switch" ref={rootRef}>
-      <button type="button" className="lang-switch__trigger" aria-haspopup="listbox" aria-expanded={open} aria-label={t.languageSwitcher.ariaLabel} onClick={() => setOpen((value) => !value)}>
+    <div className={`lang-switch ${className}`.trim()} ref={rootRef}>
+      <button type="button" className="lang-switch__trigger" aria-haspopup="listbox" aria-expanded={open} aria-label={t.languageSwitcher.ariaLabel} onClick={() => onOpenChange(!open)}>
         {localeLabels[locale]}<i />
       </button>
       {open && (
         <ul className="lang-switch__menu" role="listbox" aria-label={t.languageSwitcher.ariaLabel}>
           {locales.map((code) => (
             <li key={code}>
-              <button type="button" role="option" aria-selected={code === locale} className={code === locale ? "is-active" : ""} onClick={() => { setLocale(code); setOpen(false); }}>
+              <button type="button" role="option" aria-selected={code === locale} className={code === locale ? "is-active" : ""} onClick={() => { setLocale(code); onOpenChange(false); }}>
                 <span>{localeLabels[code]}</span><small>{localeNames[code]}</small>
               </button>
             </li>
@@ -58,45 +60,34 @@ function LanguageSwitcher() {
   );
 }
 
-// Flat row of language buttons shown inside the mobile nav panel — a dropdown-inside-a-
-// dropdown is fiddly to tap accurately, so mobile gets direct one-tap selection instead.
-function LanguageRow() {
-  const { locale, setLocale } = useLocale();
-  const t = useT();
-  return (
-    <div className="lang-row" role="group" aria-label={t.languageSwitcher.ariaLabel}>
-      {locales.map((code) => (
-        <button key={code} type="button" className={code === locale ? "is-active" : ""} aria-pressed={code === locale} onClick={() => setLocale(code)}>
-          {localeLabels[code]}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 // basePath is "" on the landing page (in-page anchors) or "./index.html" from another
 // page (e.g. checkout.html), so nav/CTA links always resolve to the right document.
 export function Header({ basePath = "" }: { basePath?: string }) {
-  const [open, setOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const t = useT();
   useEffect(() => {
-    if (!open) return;
-    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    if (!navOpen) return;
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setNavOpen(false); };
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
-  }, [open]);
+  }, [navOpen]);
+
+  const toggleNav = () => { setNavOpen((value) => !value); setLangOpen(false); };
+  const setLangOpenExclusive = (value: boolean) => { setLangOpen(value); if (value) setNavOpen(false); };
+
   return (
     <header className="site-header">
       <a className="wordmark" href={`${basePath}#top`} aria-label={t.header.homeAriaLabel}>RETATRUTIDE</a>
-      <button className="menu-button" type="button" aria-expanded={open} aria-controls="site-nav" onClick={() => setOpen(!open)}>
-        <span>{open ? t.header.close : t.header.menu}</span><i /><i />
+      <LanguageSwitcher open={langOpen} onOpenChange={setLangOpenExclusive} className="lang-switch--mobile" />
+      <button className="menu-button" type="button" aria-expanded={navOpen} aria-controls="site-nav" onClick={toggleNav}>
+        <span>{navOpen ? t.header.close : t.header.menu}</span><i /><i />
       </button>
-      <nav id="site-nav" className={open ? "nav is-open" : "nav"} aria-label={t.header.navAriaLabel}>
-        {navKeys.map((key) => <a key={key} href={`${basePath}#${key}`} onClick={() => setOpen(false)}>{t.header.nav[key]}</a>)}
-        <LanguageRow />
+      <nav id="site-nav" className={navOpen ? "nav is-open" : "nav"} aria-label={t.header.navAriaLabel}>
+        {navKeys.map((key) => <a key={key} href={`${basePath}#${key}`} onClick={() => setNavOpen(false)}>{t.header.nav[key]}</a>)}
       </nav>
       <div className="header-actions">
-        <LanguageSwitcher />
+        <LanguageSwitcher open={langOpen} onOpenChange={setLangOpenExclusive} />
         <a className="button button--ghost" href={CONSULT_URL}>{t.common.consultExpert}<Arrow /></a>
         <a className="button button--dark" href={`${basePath}#products`}>{t.common.buyNow}<Arrow /></a>
       </div>
