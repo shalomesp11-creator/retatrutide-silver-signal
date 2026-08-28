@@ -348,6 +348,33 @@ function PricingGroup({ product }: { product: Product }) {
   );
 }
 
+const paymentDeliveryPoints = [
+  { label: "EU Delivery", copy: "Delivery options are available across supported EU destinations." },
+  { label: "Dispatch", copy: "Order processing and dispatch details are confirmed as part of checkout." },
+  { label: "Payment Methods", copy: "Available payment options are presented on the checkout page." },
+  { label: "Tracking", copy: "Tracking is provided where offered by the selected shipping method." },
+] as const;
+
+function PaymentDelivery() {
+  return (
+    <div className="payment-delivery" data-reveal>
+      <div className="payment-delivery__head">
+        <Eyebrow>Payment & delivery</Eyebrow>
+        <p>What to expect once you check out.</p>
+      </div>
+      <div className="payment-delivery__grid">
+        {paymentDeliveryPoints.map((point, index) => (
+          <div key={point.label}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <strong>{point.label}</strong>
+            <p>{point.copy}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Products() {
   return (
     <section className="section products" id="products">
@@ -365,6 +392,7 @@ function Products() {
             <li>Keep refrigerated at 2–8°C (36–46°F).</li><li>Do not freeze.</li><li>Protect from light.</li><li>Avoid frequent temperature changes.</li><li>Once reconstituted, refrigerate and use within approximately one month.</li>
           </ul>
         </aside>
+        <PaymentDelivery />
       </div>
     </section>
   );
