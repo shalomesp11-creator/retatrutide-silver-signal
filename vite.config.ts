@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         main: "index.html",
         checkout: "checkout.html",
+        policy: "policy.html",
       },
     },
   },

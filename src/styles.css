@@ -43,6 +43,12 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 .button--ghost:hover { border-color: #1a1b18; }
 .button--light { background: #fff; color: #141513; }
 .button--metal { color: #10110f; background: linear-gradient(120deg, #fbfbfb, #aeb2ae 38%, #f5f6f4 60%, #8c918d); box-shadow: inset 0 1px #fff; }
+/* Same metallic treatment as .button--metal, applied as a hover/active/focus overlay so a
+   .button--dark can swap to it smoothly instead of the site-wide brown :hover fade. */
+.button--metal-hover { position: relative; z-index: 0; overflow: hidden; }
+.button--metal-hover::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--metal); opacity: 0; transition: opacity .3s ease; }
+.button--metal-hover:hover, .button--metal-hover:focus-visible, .button--metal-hover:active { color: #10110f; background: #171816; }
+.button--metal-hover:hover::before, .button--metal-hover:focus-visible::before, .button--metal-hover:active::before { opacity: 1; }
 .text-link { min-height: 44px; display: inline-flex; align-items: center; gap: 12px; padding-bottom: 4px; border-bottom: 1px solid currentColor; font-size: 13px; font-weight: 600; }
 .arrow-icon { width: 15px; height: 15px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
 
@@ -307,6 +313,7 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 .footer-bottom { position: relative; z-index: 1; padding-top: 22px; display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 32px; align-items: center; color: #7f827c; font-size: 10px; }
 .footer-bottom p { max-width: 700px; margin: 0; }
 .footer-bottom a { min-height: 44px; display: inline-flex; align-items: center; }
+.footer-bottom-links { display: flex; align-items: center; gap: 18px; }
 
 .cookie-banner { position: fixed; z-index: 50; right: 18px; bottom: 18px; width: min(480px, calc(100vw - 36px)); padding: 17px; border: 1px solid rgba(20,21,19,.14); border-radius: 18px; display: flex; align-items: center; gap: 20px; background: rgba(249,249,246,.94); box-shadow: 0 22px 60px rgba(15,16,14,.16); backdrop-filter: blur(18px); }
 .cookie-banner p { margin: 0; color: #666963; font-size: 11px; line-height: 1.45; }
@@ -358,6 +365,11 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 .checkout-field input:focus, .checkout-field select:focus { outline: 0; border-color: #141513; background: #fff; }
 .checkout-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .checkout-field--full { grid-column: 1 / -1; }
+/* Grid-rows 0fr→1fr trick: animates the "Other country" field open/closed without layout jumps. */
+.checkout-field-collapse { grid-column: 1 / -1; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s cubic-bezier(.2,.7,.2,1); }
+.checkout-field-collapse.is-open { grid-template-rows: 1fr; }
+.checkout-field-collapse > .checkout-field { overflow: hidden; opacity: 0; transition: opacity .25s ease; }
+.checkout-field-collapse.is-open > .checkout-field { opacity: 1; transition: opacity .3s ease .1s; }
 
 .checkout-options { display: grid; gap: 12px; }
 .checkout-option { position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 20px; border: 1px solid rgba(20,21,19,.14); border-radius: 18px; background: rgba(255,255,255,.5); cursor: pointer; transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease; }

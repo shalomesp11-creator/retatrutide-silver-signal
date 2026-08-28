@@ -3,6 +3,9 @@ import { nav } from "./content";
 
 export const CONSULT_URL = "https://driadashop.helpline.to/en-US/new-ticket";
 export const REVIEW_URL = "https://peds.to/reviews/retatrutide.157/reviews";
+// policy.html is a sibling page at the site root, so this relative path resolves
+// correctly from index.html, checkout.html and policy.html alike.
+export const POLICY_URL = "policy.html";
 
 export function Arrow() {
   return <svg className="arrow-icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6" /></svg>;
@@ -48,7 +51,7 @@ export function Footer({ basePath = "" }: { basePath?: string }) {
         <nav aria-label="Footer"><strong>Explore</strong>{nav.map(([label, href]) => <a key={href} href={`${basePath}${href}`}>{label}</a>)}</nav>
         <div className="footer-meta"><strong>Independent sources</strong><a href={REVIEW_URL}>Forum reviews<Arrow /></a><a href="https://www.eroids.com/reviews/driadashop.to">DriadaShop reviews<Arrow /></a><button type="button" onClick={() => window.dispatchEvent(new Event("retatrutide:open-cookie-settings"))}>Cookie settings</button></div>
       </div>
-      <div className="footer-bottom"><p>Early studies show Retatrutide is generally well tolerated, but long-term data is limited. A doctor’s prescription is required.</p><span>© 2026 Retatrutide</span><a href={`${basePath}#top`}>Back to top ↑</a></div>
+      <div className="footer-bottom"><p>Early studies show Retatrutide is generally well tolerated, but long-term data is limited. A doctor’s prescription is required.</p><span>© 2026 Retatrutide</span><div className="footer-bottom-links"><a href={POLICY_URL}>Policy</a><a href={`${basePath}#top`}>Back to top ↑</a></div></div>
     </footer>
   );
 }

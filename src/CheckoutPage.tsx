@@ -15,7 +15,8 @@ const paymentOptions = [
   { id: "crypto", label: "Cryptocurrency", note: "BTC, ETH, USDT" },
 ] as const;
 
-const countries = ["Germany", "France", "Netherlands", "Spain", "Italy", "Poland", "Belgium", "Austria", "Ireland", "Sweden", "Other EU country"];
+const countries = ["Germany", "France", "Netherlands", "Spain", "Italy", "Poland", "Belgium", "Austria", "Ireland", "Sweden", "Other country"];
+const OTHER_COUNTRY = "Other country";
 
 function parsePrice(value: string): number {
   const num = parseFloat(value.replace(/[^0-9.,]/g, "").replace(",", "."));
@@ -61,6 +62,9 @@ export default function CheckoutPage() {
   const { product, bundle, changeProduct, changeBundle } = useOrderSelection();
   const [shipping, setShipping] = useState<(typeof shippingOptions)[number]["id"]>("standard");
   const [payment, setPayment] = useState<(typeof paymentOptions)[number]["id"]>("card");
+  const [country, setCountry] = useState("");
+  const [otherCountry, setOtherCountry] = useState("");
+  const isOtherCountry = country === OTHER_COUNTRY;
   const [submitted, setSubmitted] = useState(false);
 
   const subtotal = parsePrice(bundle.price);
@@ -132,11 +136,26 @@ export default function CheckoutPage() {
                 <label className="checkout-field"><span>City</span><input name="city" autoComplete="address-level2" /></label>
                 <label className="checkout-field"><span>Postal code</span><input name="postalCode" autoComplete="postal-code" /></label>
                 <label className="checkout-field checkout-field--full"><span>Country</span>
-                  <select name="country" defaultValue="">
+                  <select name="country" value={country} onChange={(event) => setCountry(event.target.value)}>
                     <option value="" disabled>Select country</option>
-                    {countries.map((country) => <option key={country} value={country}>{country}</option>)}
+                    {countries.map((item) => <option key={item} value={item}>{item}</option>)}
                   </select>
                 </label>
+                <div className={isOtherCountry ? "checkout-field-collapse is-open" : "checkout-field-collapse"}>
+                  <label className="checkout-field checkout-field--full">
+                    <span>Enter your country</span>
+                    <input
+                      type="text"
+                      name="countryOther"
+                      placeholder="Enter your country"
+                      value={otherCountry}
+                      onChange={(event) => setOtherCountry(event.target.value)}
+                      required={isOtherCountry}
+                      disabled={!isOtherCountry}
+                      tabIndex={isOtherCountry ? 0 : -1}
+                    />
+                  </label>
+                </div>
               </div>
             </section>
 
@@ -186,7 +205,7 @@ export default function CheckoutPage() {
                 <div><dt>Shipping</dt><dd>{shippingCost === 0 ? "Free" : formatPrice(shippingCost)}</dd></div>
                 <div className="checkout-summary__total"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
               </dl>
-              <button type="submit" className="button button--dark checkout-cta">
+              <button type="submit" className="button button--dark button--metal-hover checkout-cta">
                 {submitted ? "Preview submitted" : "Continue to payment"}<Arrow />
               </button>
               {submitted && (
