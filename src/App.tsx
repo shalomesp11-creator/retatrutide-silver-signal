@@ -1,62 +1,21 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import { benefits, faqs, nav, products, receptors, reviews, type Product } from "./content";
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { benefits, faqs, products, receptors, reviews, type Bundle, type Product } from "./content";
+import { Arrow, Eyebrow, CONSULT_URL, REVIEW_URL, Header, Footer, CookieBanner, useHeaderInvert, useReveal } from "./site";
 
-const CART_ENDPOINT = "https://driadashop.to/index.php?route=external/cart/add";
-const CART_TOKEN = "1912.bedc2c70ff05b76507b1478aa3f0ed44ed757a932014dbf6c0993527f02bc750";
-const CONSULT_URL = "https://driadashop.helpline.to/en-US/new-ticket";
-const REVIEW_URL = "https://peds.to/reviews/retatrutide.157/reviews";
 const TRACKING_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
 const SUBID_KEYS = ["subid", "sub_id", "clickid", "click_id", "cid", "cnv_id", "tid", "transaction_id"] as const;
 
-function Arrow() {
-  return <svg className="arrow-icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6" /></svg>;
-}
-
-function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="eyebrow"><span />{children}</p>;
-}
-
-function CartForm({ quantity = 1, className = "", children = "Buy now" }: { quantity?: number; className?: string; children?: ReactNode }) {
-  const query = typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
-  const tracking: Array<{ name: string; value: string }> = TRACKING_KEYS.flatMap((name) => {
-    const value = query?.get(name);
-    return value ? [{ name, value: value.slice(0, 120) }] : [];
-  });
-  const subid = SUBID_KEYS.map((name) => query?.get(name)).find(Boolean);
-  if (subid) tracking.push({ name: "subid", value: subid.slice(0, 120) });
-  return (
-    <form className={`cart-form ${className}`.trim()} method="post" action={CART_ENDPOINT}>
-      <input type="hidden" name="token" value={CART_TOKEN} />
-      <input type="hidden" name="quantity" value={quantity} />
-      {tracking.map((field) => <input key={field.name} type="hidden" name={field.name} value={field.value} />)}
-      <button className="button button--dark" type="submit">{children}<Arrow /></button>
-    </form>
-  );
-}
-
-function Header() {
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, [open]);
-  return (
-    <header className="site-header">
-      <a className="wordmark" href="#top" aria-label="Retatrutide home">RETATRUTIDE</a>
-      <button className="menu-button" type="button" aria-expanded={open} aria-controls="site-nav" onClick={() => setOpen(!open)}>
-        <span>{open ? "Close" : "Menu"}</span><i /><i />
-      </button>
-      <nav id="site-nav" className={open ? "nav is-open" : "nav"} aria-label="Main navigation">
-        {nav.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>)}
-      </nav>
-      <div className="header-actions">
-        <a className="button button--ghost" href={CONSULT_URL}>Consult an expert<Arrow /></a>
-        <a className="button button--dark" href="#products">Buy now<Arrow /></a>
-      </div>
-    </header>
-  );
+// Carries the chosen product + bundle into the checkout mock via the query string —
+// the hand-off point a real cart/session would replace later.
+function checkoutHref(product: Product, bundle: Bundle) {
+  const params = new URLSearchParams({ product: product.id, bundle: bundle.name, qty: String(bundle.quantity) });
+  if (typeof window !== "undefined") {
+    const query = new URLSearchParams(window.location.search);
+    TRACKING_KEYS.forEach((key) => { const value = query.get(key); if (value) params.set(key, value.slice(0, 120)); });
+    const subid = SUBID_KEYS.map((key) => query.get(key)).find(Boolean);
+    if (subid) params.set("subid", subid.slice(0, 120));
+  }
+  return `checkout.html?${params.toString()}`;
 }
 
 function Hero() {
@@ -361,7 +320,7 @@ function ProductCard({ product }: { product: Product }) {
           <div><dt>Form</dt><dd>Vial with lyophilised powder + {product.water}</dd></div>
           <div><dt>Administration</dt><dd>Subcutaneous injections</dd></div>
         </dl>
-        <div className="product-card__actions"><CartForm /><a className="button button--ghost" href={CONSULT_URL}>Consult an expert<Arrow /></a></div>
+        <div className="product-card__actions"><a className="button button--dark" href={checkoutHref(product, product.bundles[0])}>Buy now<Arrow /></a><a className="button button--ghost" href={CONSULT_URL}>Consult an expert<Arrow /></a></div>
       </div>
     </article>
   );
@@ -381,7 +340,7 @@ function PricingGroup({ product }: { product: Product }) {
             <div className="pricing-name"><strong>{bundle.name}</strong><small>{bundle.supply}</small></div>
             <div className="pricing-total"><strong>{bundle.price}</strong><s>{bundle.original}</s></div>
             <div className="pricing-value"><span>{bundle.unit}</span><span>{bundle.saving}</span></div>
-            <CartForm quantity={bundle.quantity}>Choose {bundle.quantity} {bundle.quantity === 1 ? "unit" : "units"}</CartForm>
+            <a className="button button--dark" href={checkoutHref(product, bundle)}>Choose {bundle.quantity} {bundle.quantity === 1 ? "unit" : "units"}<Arrow /></a>
           </article>
         ))}
       </div>
@@ -459,41 +418,6 @@ function FAQ() {
   );
 }
 
-function Footer() {
-  return (
-    <footer className="site-footer" data-dark>
-      <div className="footer-signal" aria-hidden="true">RETATRUTIDE</div>
-      <div className="footer-grid">
-        <div><a className="wordmark" href="#top">RETATRUTIDE</a><p>Product information, documentation and the next purchasing step in one place.</p><div><a className="button button--light" href={CONSULT_URL}>Consult an expert<Arrow /></a><a className="button button--metal" href="#products">Buy now<Arrow /></a></div></div>
-        <nav aria-label="Footer"><strong>Explore</strong>{nav.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
-        <div className="footer-meta"><strong>Independent sources</strong><a href={REVIEW_URL}>Forum reviews<Arrow /></a><a href="https://www.eroids.com/reviews/driadashop.to">DriadaShop reviews<Arrow /></a><button type="button" onClick={() => window.dispatchEvent(new Event("retatrutide:open-cookie-settings"))}>Cookie settings</button></div>
-      </div>
-      <div className="footer-bottom"><p>Early studies show Retatrutide is generally well tolerated, but long-term data is limited. A doctor’s prescription is required.</p><span>© 2026 Retatrutide</span><a href="#top">Back to top ↑</a></div>
-    </footer>
-  );
-}
-
-function CookieBanner() {
-  const consentKey = "retatrutide-essential-cookie-choice";
-  const dismissedKey = "retatrutide-cookie-notice-dismissed";
-  const [visible, setVisible] = useState(() => {
-    try { return localStorage.getItem(consentKey) !== "accepted" && sessionStorage.getItem(dismissedKey) !== "true"; }
-    catch { return true; }
-  });
-  useEffect(() => {
-    const open = () => setVisible(true);
-    window.addEventListener("retatrutide:open-cookie-settings", open);
-    return () => window.removeEventListener("retatrutide:open-cookie-settings", open);
-  }, []);
-  if (!visible) return null;
-  return (
-    <aside className="cookie-banner" aria-label="Cookie notice" aria-live="polite">
-      <p><strong>Your privacy matters.</strong> This site uses essential cookies only.</p>
-      <div><button type="button" onClick={() => { try { sessionStorage.setItem(dismissedKey, "true"); } catch { /* storage can be unavailable */ } setVisible(false); }}>Dismiss</button><button type="button" onClick={() => { try { localStorage.setItem(consentKey, "accepted"); } catch { /* storage can be unavailable */ } setVisible(false); }}>Accept essential</button></div>
-    </aside>
-  );
-}
-
 function ReportDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -512,35 +436,8 @@ function ReportDialog({ open, onClose }: { open: boolean; onClose: () => void })
 
 export default function App() {
   const [reportOpen, setReportOpen] = useState(false);
-  useEffect(() => {
-    // The header is translucent, so it inverts wherever it floats over a dark surface.
-    const header = document.querySelector<HTMLElement>(".site-header");
-    if (!header) return;
-    const update = () => {
-      const box = header.getBoundingClientRect();
-      const y = box.top + box.height / 2;
-      const overDark = [18, window.innerWidth / 2, window.innerWidth - 18].some((x) =>
-        document.elementsFromPoint(x, y).some((el) => !el.closest(".site-header") && el instanceof HTMLElement && el.hasAttribute("data-dark")));
-      header.classList.toggle("is-inverted", overDark);
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => { window.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
-  }, []);
-  useEffect(() => {
-    document.documentElement.classList.add("js");
-    const nodes = [...document.querySelectorAll<HTMLElement>("[data-reveal]")];
-    const revealPassed = () => nodes.forEach((node) => {
-      if (!node.classList.contains("is-visible") && node.getBoundingClientRect().top <= window.innerHeight * .94) node.classList.add("is-visible");
-    });
-    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); observer.unobserve(entry.target); } }), { rootMargin: "0px 0px 80px", threshold: 0.01 });
-    nodes.forEach((node) => observer.observe(node));
-    revealPassed();
-    window.addEventListener("scroll", revealPassed, { passive: true });
-    window.addEventListener("resize", revealPassed);
-    return () => { observer.disconnect(); window.removeEventListener("scroll", revealPassed); window.removeEventListener("resize", revealPassed); };
-  }, []);
+  useHeaderInvert();
+  useReveal();
   return (
     <>
       <Header /><main><Hero /><TrustRail /><About /><Mechanism /><WhoFor /><Products /><Quality onOpen={() => setReportOpen(true)} /><Reviews /><FAQ /></main><Footer />
