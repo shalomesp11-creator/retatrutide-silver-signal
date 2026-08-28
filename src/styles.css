@@ -351,11 +351,11 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
   :root { --shell: calc(100vw - 24px); }
   .section { padding: 72px 0; scroll-margin-top: 78px; }
   #about { scroll-margin-top: 132px; }
-  .site-header { top: 6px; width: calc(100vw - 16px); height: 50px; padding-left: 16px; border-color: rgba(255,255,255,.28); border-radius: 14px; background: rgba(250,250,247,.10); box-shadow: 0 6px 18px rgba(22,24,20,.035), inset 0 1px rgba(255,255,255,.22); -webkit-backdrop-filter: blur(10px) saturate(140%); }
-  .site-header.is-inverted { border-color: rgba(255,255,255,.12); background: rgba(20,21,19,.14); box-shadow: 0 6px 18px rgba(0,0,0,.08), inset 0 1px rgba(255,255,255,.08); -webkit-backdrop-filter: blur(10px) saturate(130%); }
+  .site-header { top: 6px; width: calc(100vw - 16px); height: 50px; padding-left: 16px; border-color: rgba(255,255,255,.32); border-radius: 14px; background: rgba(250,250,247,.16); box-shadow: 0 6px 18px rgba(22,24,20,.035), inset 0 1px rgba(255,255,255,.25); -webkit-backdrop-filter: blur(3px) saturate(120%); }
+  .site-header.is-inverted { border-color: rgba(255,255,255,.16); background: rgba(20,21,19,.16); box-shadow: 0 6px 18px rgba(0,0,0,.08), inset 0 1px rgba(255,255,255,.1); -webkit-backdrop-filter: blur(3px) saturate(115%); }
   @supports (backdrop-filter: blur(1px)) {
-    .site-header { backdrop-filter: blur(10px) saturate(140%); }
-    .site-header.is-inverted { backdrop-filter: blur(10px) saturate(130%); }
+    .site-header { backdrop-filter: blur(3px) saturate(120%); }
+    .site-header.is-inverted { backdrop-filter: blur(3px) saturate(115%); }
   }
   .wordmark { font-size: 12px; }
   .nav { top: 58px; }
