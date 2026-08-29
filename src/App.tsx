@@ -273,7 +273,7 @@ function WhoFor() {
                 key={meta.image}
                 className={active === index ? "is-active" : ""}
                 src={meta.image}
-                style={{ objectPosition: meta.focus }}
+                style={{ "--who-focus": meta.focus, "--who-focus-mobile": meta.focusMobile } as CSSProperties}
                 alt={active === index ? benefits[index].alt : ""}
                 aria-hidden={active !== index}
                 width="1536"

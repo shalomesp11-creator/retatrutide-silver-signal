@@ -10,11 +10,11 @@ export const receptorMeta = [
 ] as const;
 
 export const benefitMeta = [
-  { image: "assets/people/audience-01.webp", focus: "58% 2%" },
-  { image: "assets/people/audience-02.webp", focus: "51% 2%" },
-  { image: "assets/people/audience-03.webp", focus: "56% 2%" },
-  { image: "assets/people/audience-04.webp", focus: "46% 2%" },
-  { image: "assets/people/audience-05.webp", focus: "57% 2%" },
+  { image: "assets/people/audience-01.png", focus: "68% 2%", focusMobile: "95% center" },
+  { image: "assets/people/audience-02.png", focus: "55% 4%", focusMobile: "78% center" },
+  { image: "assets/people/audience-03.png", focus: "65% 3%", focusMobile: "90% center" },
+  { image: "assets/people/audience-04.png", focus: "60% 10%", focusMobile: "84% center" },
+  { image: "assets/people/audience-05.png", focus: "70% 3%", focusMobile: "97% center" },
 ] as const;
 
 export type BundleId = "starter" | "performance" | "proCycle";
