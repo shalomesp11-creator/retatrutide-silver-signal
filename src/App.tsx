@@ -9,13 +9,27 @@ const TRACKING_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content"
 // it under the single field name the Driada Shop cart / Binom postback expects: subid.
 const SUBID_KEYS = ["subid", "sub_id", "clickid", "click_id", "cid", "cnv_id", "tid", "transaction_id"] as const;
 
-// Same scheme as the Tirzepatide landing: <input type="hidden" name="subid" value="{clickid}">.
-// Always present (even empty) so the field is never silently missing from the submission.
+// Prefer an explicit click id from the URL. Binom's integrated no-redirect landers keep
+// the real click id in the first-party `bcid` cookie, so use it as a fallback when the
+// browser-visible campaign URL does not contain a click id parameter.
 function readClickId(): string {
   if (typeof window === "undefined") return "";
   const query = new URLSearchParams(window.location.search);
-  const value = SUBID_KEYS.map((key) => query.get(key)).find(Boolean);
-  return value ? value.slice(0, 120) : "";
+  const queryValue = SUBID_KEYS.map((key) => query.get(key)).find(Boolean);
+  if (queryValue) return queryValue.slice(0, 120);
+
+  const bcidCookie = document.cookie
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith("bcid="));
+  if (!bcidCookie) return "";
+
+  const rawValue = bcidCookie.slice("bcid=".length);
+  try {
+    return decodeURIComponent(rawValue).slice(0, 120);
+  } catch {
+    return rawValue.slice(0, 120);
+  }
 }
 
 // Extra UTM params to forward as hidden fields on every Add-to-cart submission, so
