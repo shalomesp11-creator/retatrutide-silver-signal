@@ -24,6 +24,7 @@ export type Bundle = {
   price: string;
   original: string;
   unit: string;
+  discountPercent: number;
   popular?: boolean;
 };
 
@@ -34,36 +35,96 @@ export type Product = {
   image: string;
   price: string;
   original: string;
+  discountPercent: number;
   labHref?: string;
   bundles: readonly Bundle[];
 };
 
+// --- Pricing switch -----------------------------------------------------
+// Single source of truth for every price on the site (product cards, bundle
+// selectors, checkout, order summary, discount badges — everywhere). Prices
+// flip automatically once Europe/Berlin reaches PRICE_SWITCH_AT; no manual
+// step or redeploy is needed on the day itself, and the logic ships inside
+// this file so it keeps working after the project is handed off and rebuilt
+// on any other hosting.
+const PRICING_TIMEZONE = "Europe/Berlin";
+const PRICE_SWITCH_AT = "2026-09-01T00:00:00";
+
+function isNewPricingActive(now: Date = new Date()): boolean {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: PRICING_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const part = (type: string) => parts.find((entry) => entry.type === type)?.value ?? "00";
+  const berlinTimestamp = `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}:${part("second")}`;
+  return berlinTimestamp >= PRICE_SWITCH_AT;
+}
+
+type BundlePricing = { price: string; original: string; unit: string; discountPercent: number };
+type ProductPricing = Record<BundleId, BundlePricing>;
+
+// Prices in effect through 31 August 2026 (Europe/Berlin) — flat 15% off every bundle.
+const LEGACY_PRICING: Record<ProductId, ProductPricing> = {
+  "10": {
+    starter: { price: "€52.11", original: "€61.30", unit: "€52.11", discountPercent: 15 },
+    performance: { price: "€156.33", original: "€183.90", unit: "€52.11", discountPercent: 15 },
+    proCycle: { price: "€260.55", original: "€306.50", unit: "€52.11", discountPercent: 15 },
+  },
+  "20": {
+    starter: { price: "€90.27", original: "€106.20", unit: "€90.27", discountPercent: 15 },
+    performance: { price: "€270.81", original: "€318.60", unit: "€90.27", discountPercent: 15 },
+    proCycle: { price: "€451.35", original: "€531.00", unit: "€90.27", discountPercent: 15 },
+  },
+};
+
+// Prices in effect from 1 September 2026, 00:00 Europe/Berlin — 1x at full price
+// (no discount), 3x at -5%, 5x at -7%.
+const NEXT_PRICING: Record<ProductId, ProductPricing> = {
+  "10": {
+    starter: { price: "€61.30", original: "€61.30", unit: "€61.30", discountPercent: 0 },
+    performance: { price: "€174.71", original: "€183.90", unit: "€61.30", discountPercent: 5 },
+    proCycle: { price: "€285.05", original: "€306.50", unit: "€61.30", discountPercent: 7 },
+  },
+  "20": {
+    starter: { price: "€106.20", original: "€106.20", unit: "€106.20", discountPercent: 0 },
+    performance: { price: "€302.67", original: "€318.60", unit: "€106.20", discountPercent: 5 },
+    proCycle: { price: "€493.83", original: "€531.00", unit: "€106.20", discountPercent: 7 },
+  },
+};
+
+const ACTIVE_PRICING = isNewPricingActive() ? NEXT_PRICING : LEGACY_PRICING;
+
+const bundleOrder: readonly { id: BundleId; quantity: number; popular?: boolean }[] = [
+  { id: "starter", quantity: 1 },
+  { id: "performance", quantity: 3, popular: true },
+  { id: "proCycle", quantity: 5 },
+];
+
+function buildProduct(id: ProductId, dosage: string, image: string, labHref?: string): Product {
+  const pricing = ACTIVE_PRICING[id];
+  const bundles: Bundle[] = bundleOrder.map((meta) => ({ ...meta, ...pricing[meta.id] }));
+  const starter = pricing.starter;
+  return {
+    id,
+    dosage,
+    image,
+    labHref,
+    price: starter.price,
+    original: starter.original,
+    discountPercent: starter.discountPercent,
+    bundles,
+  };
+}
+
 export const products: readonly Product[] = [
-  {
-    id: "10",
-    dosage: "10 mg / vial",
-    image: "assets/product/retatrutide-10mg-v4.webp",
-    price: "€52.11",
-    original: "€61.30",
-    labHref: "#quality",
-    bundles: [
-      { id: "starter", quantity: 1, price: "€52.11", original: "€61.30", unit: "€52.11" },
-      { id: "performance", quantity: 3, price: "€156.33", original: "€183.90", unit: "€52.11", popular: true },
-      { id: "proCycle", quantity: 5, price: "€260.55", original: "€306.50", unit: "€52.11" },
-    ],
-  },
-  {
-    id: "20",
-    dosage: "20 mg / vial",
-    image: "assets/product/retatrutide-20mg-v4.webp",
-    price: "€90.27",
-    original: "€106.20",
-    bundles: [
-      { id: "starter", quantity: 1, price: "€90.27", original: "€106.20", unit: "€90.27" },
-      { id: "performance", quantity: 3, price: "€270.81", original: "€318.60", unit: "€90.27", popular: true },
-      { id: "proCycle", quantity: 5, price: "€451.35", original: "€531.00", unit: "€90.27" },
-    ],
-  },
+  buildProduct("10", "10 mg / vial", "assets/product/retatrutide-10mg-v4.webp", "#quality"),
+  buildProduct("20", "20 mg / vial", "assets/product/retatrutide-20mg-v4.webp"),
 ] as const;
 
 export const reviewMeta = [

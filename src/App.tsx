@@ -322,7 +322,11 @@ function ProductCard({ product }: { product: Product }) {
         <Eyebrow>Driada Medical · {info.accent}</Eyebrow>
         <h3>Retatrutide</h3>
         <p className="product-card__dose">{product.dosage}</p>
-        <div className="product-card__price"><strong>{product.price}</strong><s>{product.original}</s><span>{t.common.savingBadge}</span></div>
+        <div className="product-card__price">
+          <strong>{product.price}</strong>
+          {product.discountPercent > 0 && <s>{product.original}</s>}
+          {product.discountPercent > 0 && <span>{t.common.savingBadge(product.discountPercent)}</span>}
+        </div>
         <dl>
           <div><dt>{t.products.composition}</dt><dd>Retatrutide {product.id} mg</dd></div>
           <div><dt>{t.products.category}</dt><dd>{t.products.categoryValue}</dd></div>
@@ -352,8 +356,14 @@ function PricingGroup({ product }: { product: Product }) {
           return (
             <article key={bundle.id} className={bundle.popular ? "is-popular" : ""}>
               <div className="pricing-name"><strong>{bundleInfo.name}</strong><small>{bundleInfo.supply}</small></div>
-              <div className="pricing-total"><strong>{bundle.price}</strong><s>{bundle.original}</s></div>
-              <div className="pricing-value"><span>{bundle.unit} {t.common.perUnit}</span><span>{t.common.savingBadge}</span></div>
+              <div className="pricing-total">
+                <strong>{bundle.price}</strong>
+                {bundle.discountPercent > 0 && <s>{bundle.original}</s>}
+              </div>
+              <div className="pricing-value">
+                <span>{bundle.unit} {t.common.perUnit}</span>
+                {bundle.discountPercent > 0 && <span className="pricing-value__badge">{t.common.savingBadge(bundle.discountPercent)}</span>}
+              </div>
               <a className="button button--dark" href={checkoutHref(product, bundle)}>{t.common.chooseButton(bundle.quantity)}<Arrow /></a>
             </article>
           );

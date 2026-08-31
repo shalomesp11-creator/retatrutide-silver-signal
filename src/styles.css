@@ -231,7 +231,7 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 .pricing-total strong { font: 500 27px/1 "Manrope"; letter-spacing: -.04em; }
 .pricing-total s { color: #8b8e88; font-size: 11px; }
 .pricing-value { display: flex; flex-direction: column; gap: 5px; font-size: 10px; }
-.pricing-value span:last-child { color: #8b5537; }
+.pricing-value__badge { color: #8b5537; }
 .pricing-rows .button { width: 100%; }
 /* Product identity — 10 mg reads violet, 20 mg reads aqua, so bundles are scannable */
 .product-card--10 { --accent: var(--violet); --accent-mid: var(--violet-mid); --accent-tint: var(--violet-tint); }
@@ -251,7 +251,7 @@ button, a, summary, input[type="range"] { -webkit-tap-highlight-color: transpare
 .pricing-group--10 > header > strong small, .pricing-group--20 > header > strong small { color: rgba(255,255,255,.76); }
 .pricing-group--10 > header > div:first-child span, .pricing-group--20 > header > div:first-child span { border-color: rgba(255,255,255,.42); background: rgba(255,255,255,.12); }
 .pricing-group--10 .pricing-rows article.is-popular, .pricing-group--20 .pricing-rows article.is-popular { background: linear-gradient(90deg, var(--accent-tint), transparent 72%); }
-.pricing-group--10 .pricing-value span:last-child, .pricing-group--20 .pricing-value span:last-child { color: var(--accent); font-weight: 600; }
+.pricing-group--10 .pricing-value__badge, .pricing-group--20 .pricing-value__badge { color: var(--accent); font-weight: 600; }
 .pricing-group--10 .pricing-rows .button, .pricing-group--20 .pricing-rows .button { background: linear-gradient(150deg, var(--accent-mid), var(--accent)); }
 .pricing-group--10 .pricing-rows .button:hover, .pricing-group--20 .pricing-rows .button:hover { background: linear-gradient(150deg, var(--accent), var(--accent-mid)); }
 

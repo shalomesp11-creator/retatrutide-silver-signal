@@ -9,7 +9,7 @@ const en = {
     unit: "unit",
     units: "units",
     perUnit: "/ unit",
-    savingBadge: "15% off",
+    savingBadge: (percent: number) => `${percent}% off`,
     // A function (not a template string) so each locale can reorder words naturally
     // instead of forcing English word order — e.g. German puts the verb last.
     chooseButton: (quantity: number) => `Choose ${quantity} ${quantity === 1 ? "unit" : "units"}`,

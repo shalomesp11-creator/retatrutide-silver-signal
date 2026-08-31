@@ -9,7 +9,7 @@ const it: Dictionary = {
     unit: "unità",
     units: "unità",
     perUnit: "/ unità",
-    savingBadge: "15% di sconto",
+    savingBadge: (percent) => `${percent}% di sconto`,
     chooseButton: (quantity) => `Scegli ${quantity} unità`,
   },
   languageSwitcher: {
