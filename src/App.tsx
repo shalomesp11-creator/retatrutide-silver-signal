@@ -4,17 +4,27 @@ import { Arrow, Eyebrow, CONSULT_URL, REVIEW_URL, Header, Footer, CookieBanner, 
 import { useT } from "./i18n";
 
 const TRACKING_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
+// Binom (and compatible trackers) may name the click id param differently depending on
+// the offer link — accept any of these aliases, "clickid" included, but always forward
+// it under the single field name the Driada Shop cart / Binom postback expects: subid.
 const SUBID_KEYS = ["subid", "sub_id", "clickid", "click_id", "cid", "cnv_id", "tid", "transaction_id"] as const;
 
-// Tracking params to forward as hidden fields on every Add-to-cart submission, so
+// Same scheme as the Tirzepatide landing: <input type="hidden" name="subid" value="{clickid}">.
+// Always present (even empty) so the field is never silently missing from the submission.
+function readClickId(): string {
+  if (typeof window === "undefined") return "";
+  const query = new URLSearchParams(window.location.search);
+  const value = SUBID_KEYS.map((key) => query.get(key)).find(Boolean);
+  return value ? value.slice(0, 120) : "";
+}
+
+// Extra UTM params to forward as hidden fields on every Add-to-cart submission, so
 // attribution survives the hand-off to the external Driada Shop cart.
-function trackingFields(): { name: string; value: string }[] {
+function utmFields(): { name: string; value: string }[] {
   if (typeof window === "undefined") return [];
   const query = new URLSearchParams(window.location.search);
   const fields: { name: string; value: string }[] = [];
   TRACKING_KEYS.forEach((key) => { const value = query.get(key); if (value) fields.push({ name: key, value: value.slice(0, 120) }); });
-  const subid = SUBID_KEYS.map((key) => query.get(key)).find(Boolean);
-  if (subid) fields.push({ name: "subid", value: subid.slice(0, 120) });
   return fields;
 }
 
@@ -26,7 +36,8 @@ function AddToCartForm({ product, quantity, className, children }: { product: Pr
     <form className="external-cart-form" method="post" action={CART_ACTION}>
       <input type="hidden" name="token" value={product.cartToken} />
       <input type="hidden" name="quantity" value={String(quantity)} />
-      {trackingFields().map((field) => <input key={field.name} type="hidden" name={field.name} value={field.value} />)}
+      <input type="hidden" name="subid" value={readClickId()} />
+      {utmFields().map((field) => <input key={field.name} type="hidden" name={field.name} value={field.value} />)}
       <button type="submit" className={className}>{children}</button>
     </form>
   );
