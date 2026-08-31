@@ -1,22 +1,35 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { benefitMeta, products, receptorMeta, reviewMeta, type Bundle, type Product } from "./content";
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { benefitMeta, products, receptorMeta, reviewMeta, CART_ACTION, type Product } from "./content";
 import { Arrow, Eyebrow, CONSULT_URL, REVIEW_URL, Header, Footer, CookieBanner, useHeaderInvert, useReveal } from "./site";
 import { useT } from "./i18n";
 
 const TRACKING_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
 const SUBID_KEYS = ["subid", "sub_id", "clickid", "click_id", "cid", "cnv_id", "tid", "transaction_id"] as const;
 
-// Carries the chosen product + bundle into the checkout mock via the query string —
-// the hand-off point a real cart/session would replace later.
-function checkoutHref(product: Product, bundle: Bundle) {
-  const params = new URLSearchParams({ product: product.id, bundle: bundle.id, qty: String(bundle.quantity) });
-  if (typeof window !== "undefined") {
-    const query = new URLSearchParams(window.location.search);
-    TRACKING_KEYS.forEach((key) => { const value = query.get(key); if (value) params.set(key, value.slice(0, 120)); });
-    const subid = SUBID_KEYS.map((key) => query.get(key)).find(Boolean);
-    if (subid) params.set("subid", subid.slice(0, 120));
-  }
-  return `checkout.html?${params.toString()}`;
+// Tracking params to forward as hidden fields on every Add-to-cart submission, so
+// attribution survives the hand-off to the external Driada Shop cart.
+function trackingFields(): { name: string; value: string }[] {
+  if (typeof window === "undefined") return [];
+  const query = new URLSearchParams(window.location.search);
+  const fields: { name: string; value: string }[] = [];
+  TRACKING_KEYS.forEach((key) => { const value = query.get(key); if (value) fields.push({ name: key, value: value.slice(0, 120) }); });
+  const subid = SUBID_KEYS.map((key) => query.get(key)).find(Boolean);
+  if (subid) fields.push({ name: "subid", value: subid.slice(0, 120) });
+  return fields;
+}
+
+// Posts straight to the Driada Shop external cart — no intermediate checkout-mock
+// logic in between. Each product carries its own dedicated cartToken (see content.ts),
+// so 10 mg and 20 mg can never cross-submit each other's token.
+function AddToCartForm({ product, quantity, className, children }: { product: Product; quantity: number; className: string; children: ReactNode }) {
+  return (
+    <form className="external-cart-form" method="post" action={CART_ACTION}>
+      <input type="hidden" name="token" value={product.cartToken} />
+      <input type="hidden" name="quantity" value={String(quantity)} />
+      {trackingFields().map((field) => <input key={field.name} type="hidden" name={field.name} value={field.value} />)}
+      <button type="submit" className={className}>{children}</button>
+    </form>
+  );
 }
 
 function Hero() {
@@ -334,7 +347,7 @@ function ProductCard({ product }: { product: Product }) {
           <div><dt>{t.products.form}</dt><dd>{t.products.formPrefix}{info.water}</dd></div>
           <div><dt>{t.products.administration}</dt><dd>{t.products.administrationValue}</dd></div>
         </dl>
-        <div className="product-card__actions"><a className="button button--dark" href={checkoutHref(product, product.bundles[0])}>{t.common.buyNow}<Arrow /></a><a className="button button--ghost" href={CONSULT_URL}>{t.common.consultExpert}<Arrow /></a></div>
+        <div className="product-card__actions"><AddToCartForm product={product} quantity={product.bundles[0].quantity} className="button button--dark">{t.common.buyNow}<Arrow /></AddToCartForm><a className="button button--ghost" href={CONSULT_URL}>{t.common.consultExpert}<Arrow /></a></div>
       </div>
     </article>
   );
@@ -364,7 +377,7 @@ function PricingGroup({ product }: { product: Product }) {
                 <span>{bundle.unit} {t.common.perUnit}</span>
                 {bundle.discountPercent > 0 && <span className="pricing-value__badge">{t.common.savingBadge(bundle.discountPercent)}</span>}
               </div>
-              <a className="button button--dark" href={checkoutHref(product, bundle)}>{t.common.chooseButton(bundle.quantity)}<Arrow /></a>
+              <AddToCartForm product={product} quantity={bundle.quantity} className="button button--dark">{t.common.chooseButton(bundle.quantity)}<Arrow /></AddToCartForm>
             </article>
           );
         })}

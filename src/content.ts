@@ -38,6 +38,16 @@ export type Product = {
   discountPercent: number;
   labHref?: string;
   bundles: readonly Bundle[];
+  cartToken: string;
+};
+
+// Driada Shop external-cart integration, as provided by the client. Each product ID
+// has its own dedicated token — never share the 20 mg token as a fallback default,
+// that's what caused 10 mg orders to silently add 20 mg to the cart.
+export const CART_ACTION = "https://driadashop.to/index.php?route=external/cart/add";
+const CART_TOKENS: Record<ProductId, string> = {
+  "10": "1545.289fe2810caf4525f60713713a5b1d7709be2cca912ac13838ee796ef2b7b8f0",
+  "20": "1912.bedc2c70ff05b76507b1478aa3f0ed44ed757a932014dbf6c0993527f02bc750",
 };
 
 // --- Pricing switch -----------------------------------------------------
@@ -119,6 +129,7 @@ function buildProduct(id: ProductId, dosage: string, image: string, labHref?: st
     original: starter.original,
     discountPercent: starter.discountPercent,
     bundles,
+    cartToken: CART_TOKENS[id],
   };
 }
 
